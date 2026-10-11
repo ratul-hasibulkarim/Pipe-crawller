@@ -1,0 +1,202 @@
+# PIPEBOT-X single source of truth.
+# Every physical constant used by CAD, calcs, firmware and docs comes from here.
+#
+# Revision 2 -- design changes forced by calc/design_calcs.py (see `rejected`):
+#   1. Expansion drive is direct (no 1:20 worm): the worm needs ~8300 rpm at the
+#      motor to meet the 20 s sweep. Self-locking comes from the Tr8x1.5 screw.
+#   2. Lead angle uses the PITCH diameter (7.25 mm -> 3.77 deg), not the nominal
+#      diameter (8 mm -> 3.41 deg). Still self-locking, margin 2.36.
+#   3. Drive wheels go through a self-locking worm (15:1). Stepper detent torque
+#      through a belt holds only ~15% of the load, so power-off hold (T1) fails
+#      with a belt drive.
+#   4. Expansion motor is size-scaled (NEMA11/14/17) instead of NEMA17 everywhere.
+#   5. Radial stroke is derived per size from pipe ID range, not fixed at 95 mm.
+#   6. Grip force is measured primarily from arm-spring deflection (hall sensor).
+#      Stepper current follows the IRUN setpoint, not the load, so it is only a
+#      cross-check / overload trip.
+#   7. Battery and buck ratings are size-scaled (L needs a 5 A / 5 V rail).
+#   8. Elbow fit at R=300 mm: S body 46->44 mm, chassis S 160->150, L 400->380.
+#   9. Final-squeeze torque uses 70% of holding torque (low speed); return springs
+#      reduced (S 3 N, L 10 N) to keep >=1.5 torque margin.
+
+common:
+  gravity_m_s2: 9.81
+  arm_count: 3
+  arm_angle_deg: 120
+  wheels_per_arm: 2
+  wheel_material: "TPU 95A hub, 60 Shore A silicone overmold tread"
+  wheel_dry_friction_coeff: 0.75
+  wheel_wet_friction_coeff: 0.42
+  grip_safety_factor: 2.0
+  min_transient_safety_factor: 1.5   # SF at the worst compliance-spring excursion
+  hold_test_load_multiple: 3.0       # T1: total axial load = this x robot weight (dry)
+  hold_test_min_margin: 1.25         # max-grip dry capacity / T1 load
+  hold_incline_deg: [0, 30, 45, 60, 90]
+  max_speed_mm_s: 120
+  max_pipe_bend_radius_mm: 300
+  sweep_time_s: 20                   # T4 full-range expand time limit
+  min_runtime_min: 60
+  arm_compliance_travel_mm: 5        # +/- passive spring travel
+  wheel_alignment_error_deg: 1.0     # wheel skew -> roll torque
+  packaging_clearance_mm: 3
+
+  cone:
+    half_angle_deg: 40               # cone surface angle from axis
+    friction_coeff: 0.08             # hardened cone / roller follower
+
+  leadscrew:
+    designation: "Tr8x1.5"
+    nominal_dia_mm: 8.0
+    pitch_dia_mm: 7.25
+    minor_dia_mm: 6.5
+    lead_mm: 1.5
+    flank_half_angle_deg: 15
+    friction_coeff: 0.15             # steel on bronze nut
+    thrust_bearing_efficiency: 0.95
+    nut_length_mm: 20
+    end_margin_mm: 30                # bearing block + clearance each end
+    e_modulus_gpa: 200
+    buckling_k: 1.0                  # pinned-pinned
+    min_buckling_sf: 3.0
+    min_self_lock_margin: 1.5        # mu_eff / tan(lead angle)
+
+  drive_worm:
+    ratio: 15
+    lead_angle_deg: 3.0
+    friction_coeff: 0.10
+    min_self_lock_margin: 1.5
+    min_rating_margin: 1.25          # gearbox rated torque / worst-case load
+
+  motor_limits:
+    rpm_utilization: 0.85            # max fraction of practical rpm
+    squeeze_torque_fraction: 0.7     # of holding torque, final low-speed squeeze
+    drive_speed_torque_fraction: 0.4
+    drive_motor_efficiency: 0.4      # mechanical/electrical, stepper + driver
+    steps_per_rev: 200
+    microsteps: 16
+
+  arm_structure:
+    material: "6061-T6"
+    e_modulus_gpa: 68.9
+    max_wheel_deflection_mm: 0.5
+    printed_material: "PETG"         # advisory comparison only
+    printed_e_modulus_gpa: 2.1
+
+  power:
+    camera_w: 1.5
+    mcu_sensors_w: 0.9
+    led_white_w_max: 4.0             # 4 x 1 W
+    led_ir_w_max: 2.0
+    led_avg_duty: 0.5
+    gimbal_avg_w: 0.5
+    gimbal_peak_w: 3.0
+    battery_nominal_v: 14.8          # 4S Li-ion
+    battery_usable_fraction: 0.8
+    converter_efficiency: 0.9
+    driver_efficiency: 0.9
+    motor_run_current_fraction: 0.7
+    motor_hold_current_fraction: 0.25
+    crawl_duty: 0.6
+    rail_margin: 1.25
+    rail_motor_v: 12.0
+    rail_logic_v: 5.0
+
+  rejected:                          # original-spec numbers, kept to prove the change
+    expansion_worm_ratio: 20
+    leadscrew_nominal_dia_lead_angle_mm: 8.0
+    drive_belt_ratio: 3.0
+    drive_belt_efficiency: 0.95
+    stepper_current_steps: 32        # TMC2209 IRUN resolution
+
+  tether_length_m: [10, 20, 50]
+  tether_od_mm: 6.5
+  ip_rating: "IP68"
+  operating_temp_c: [-10, 60]
+  camera: "IMX708 wide, 120 deg FOV, 1080p30"
+  gimbal_pan_range_deg: [-180, 180]
+  gimbal_tilt_range_deg: [-90, 90]
+
+motors:
+  NEMA11: {holding_torque_nm: 0.12, rated_current_a: 0.67, winding_ohm: 6.0, detent_torque_nm: 0.007, max_rpm: 1500}
+  NEMA14: {holding_torque_nm: 0.25, rated_current_a: 1.0, winding_ohm: 3.6, detent_torque_nm: 0.012, max_rpm: 1000}
+  NEMA17: {holding_torque_nm: 0.45, rated_current_a: 1.5, winding_ohm: 2.3, detent_torque_nm: 0.022, max_rpm: 600}
+
+sizes:
+  S:
+    pipe_id_min_mm: 75
+    pipe_id_max_mm: 160
+    body_dia_mm: 44
+    chassis_length_mm: 150
+    wheel_dia_mm: 30
+    wheel_width_mm: 12
+    wheel_crown_radius_mm: 18
+    wheelbase_mm: 85
+    max_grip_force_per_arm_n: 18
+    mass_target_kg: 0.9
+    drive_motor: NEMA11
+    expansion_motor: NEMA11
+    return_spring_force_n: 3
+    arm_spring_rate_n_mm: 0.6
+    cg_offset_mm: 3
+    arm_cantilever_mm: 30
+    arm_section_b_mm: 10
+    arm_section_h_mm: 8
+    drive_worm_rated_torque_nm: 0.5
+    compute_board: "Pi Zero 2 W"
+    compute_avg_w: 2.0
+    compute_peak_w: 3.5
+    battery_capacity_ah: 3.0         # 4S1P 18650
+    buck_12v_a: 4.0
+    buck_5v_a: 3.0
+  M:
+    pipe_id_min_mm: 150
+    pipe_id_max_mm: 320
+    body_dia_mm: 78
+    chassis_length_mm: 260
+    wheel_dia_mm: 45
+    wheel_width_mm: 20
+    wheel_crown_radius_mm: 28
+    wheelbase_mm: 150
+    max_grip_force_per_arm_n: 35
+    mass_target_kg: 1.8
+    drive_motor: NEMA14
+    expansion_motor: NEMA14
+    return_spring_force_n: 8
+    arm_spring_rate_n_mm: 1.2
+    cg_offset_mm: 5
+    arm_cantilever_mm: 55
+    arm_section_b_mm: 14
+    arm_section_h_mm: 10
+    drive_worm_rated_torque_nm: 1.2
+    compute_board: "CM4"
+    compute_avg_w: 4.0
+    compute_peak_w: 7.5
+    battery_capacity_ah: 3.0         # 4S1P 18650
+    buck_12v_a: 5.0
+    buck_5v_a: 3.0
+  L:
+    pipe_id_min_mm: 300
+    pipe_id_max_mm: 650
+    body_dia_mm: 140
+    chassis_length_mm: 380
+    wheel_dia_mm: 70
+    wheel_width_mm: 30
+    wheel_crown_radius_mm: 45
+    wheelbase_mm: 230
+    max_grip_force_per_arm_n: 70
+    mass_target_kg: 4.0
+    drive_motor: NEMA17
+    expansion_motor: NEMA17
+    return_spring_force_n: 10
+    arm_spring_rate_n_mm: 1.4
+    cg_offset_mm: 8
+    arm_cantilever_mm: 90
+    arm_section_b_mm: 20
+    arm_section_h_mm: 14
+    drive_worm_rated_torque_nm: 3.0
+    compute_board: "Pi 5"
+    compute_avg_w: 9.0
+    compute_peak_w: 12.0
+    battery_capacity_ah: 6.0         # 4S2P 18650
+    buck_12v_a: 8.0
+    buck_5v_a: 5.0
