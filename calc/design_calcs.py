@@ -355,7 +355,7 @@ def format_report(p: Params, size: str, d: dict[str, float], checks: list[Check]
     out.append("Hold requirement (wet, SF applied) by pipe incline:")
     for ang, n_tot, n_arm in hold_incline_table(p, size):
         out.append(
-            f"  {ang:5.0f} deg  N_total {n_tot:7.1f} N   per arm {n_arm:6.1f} N  (max {s['max_grip_force_per_arm_n']} N)"
+            f"  {ang:5.0f} deg  N_total {n_tot:7.1f} N   per arm {n_arm:6.1f} N (max {s['max_grip_force_per_arm_n']} N)"
         )
     out.append("Derived values:")
     for key, val in d.items():
