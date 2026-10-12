@@ -7,7 +7,7 @@
 
 #include "hal/hal.h"
 
-namespace rp2040 {
+namespace picohw {
 
 // Shared between core 1 (writer) and core 0 (reader), copied under a spinlock.
 struct SlowCache {
@@ -30,5 +30,5 @@ class Board {
 
 Board& board();
 
-}  // namespace rp2040
+}  // namespace picohw
 #endif

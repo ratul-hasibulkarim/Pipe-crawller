@@ -28,7 +28,7 @@ constexpr uint32_t kAcknowledge = kLatching | proto::faultBit(Fault::SLIP_WARNIN
 }  // namespace
 
 Robot::Robot(const hal::Hardware& hw)
-    : hw_(hw), heartbeat_(params::WATCHDOG_TIMEOUT_MS), grip_target_(params::WORKING_GRIP_N + params::REGRIP_DEADBAND_N) {}
+    : hw_(hw), heartbeat_(params::WATCHDOG_TIMEOUT_MS), grip_target_(params::DEFAULT_GRIP_TARGET_N) {}
 
 template <typename Msg>
 void Robot::send(const Msg& m) {
@@ -163,6 +163,14 @@ void Robot::handleFrame(const comm::Frame& f) {
         ok_arg = false;
       if (!ok_arg) {
         ack(m.seq, f.type, AckStatus::BAD_ARG);
+        return;
+      }
+      // a refresh of the command already satisfied while gripped: keep the state, just ack
+      const bool same = (s == State::GRIPPED || s == State::HOLDING) && mode == proto::ExpandMode::FORCE &&
+                        exp_.allContact() && std::fabs(m.target - grip_target_) < 0.01f;
+      if (same) {
+        expand_ttl_.arm(now_ms_, m.ttl_ms ? m.ttl_ms : static_cast<uint32_t>(params::EXPAND_TTL_MS));
+        ack(m.seq, f.type, AckStatus::OK);
         return;
       }
       if (!sm_.expand(mode == proto::ExpandMode::RETRACT, now_ms_)) {

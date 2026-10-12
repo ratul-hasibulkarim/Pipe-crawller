@@ -262,7 +262,7 @@ class Sil {
         m.mode = static_cast<uint8_t>(mode == "DIAMETER" ? proto::ExpandMode::DIAMETER
                                       : mode == "RETRACT"  ? proto::ExpandMode::RETRACT
                                                            : proto::ExpandMode::FORCE);
-        m.target = static_cast<float>(s.v.num("target", params::WORKING_GRIP_N + params::REGRIP_DEADBAND_N));
+        m.target = static_cast<float>(s.v.num("target", params::DEFAULT_GRIP_TARGET_N));
         m.ttl_ms = static_cast<uint16_t>(s.v.num("ttl_ms", 500));
         send(m);
         next_send_ = t_ + refresh;

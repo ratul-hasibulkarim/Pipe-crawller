@@ -17,13 +17,13 @@ bool onTick(repeating_timer_t*) {
 }
 
 core::Robot& robot() {
-  static core::Robot r(rp2040::board().hardware());  // static storage, no heap
+  static core::Robot r(picohw::board().hardware());  // static storage, no heap
   return r;
 }
 }  // namespace
 
 void setup() {
-  rp2040::board().begin();
+  picohw::board().begin();
   robot().begin(micros());
   add_repeating_timer_us(-1000, onTick, nullptr, &g_timer);
 }
@@ -35,7 +35,7 @@ void loop() {
   }
 }
 
-void setup1() { rp2040::board().beginCore1(); }
+void setup1() { picohw::board().beginCore1(); }
 
-void loop1() { rp2040::board().pollCore1(); }
+void loop1() { picohw::board().pollCore1(); }
 #endif

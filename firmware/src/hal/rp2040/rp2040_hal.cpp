@@ -3,7 +3,6 @@
 
 #include <Adafruit_BMP3XX.h>
 #include <Adafruit_BNO08x.h>
-#include <Adafruit_INA219.h>
 #include <Adafruit_SHT31.h>
 #include <Servo.h>
 #include <TMCStepper.h>
@@ -17,7 +16,7 @@
 #include "bot_params.h"
 #include "pinmap.h"
 
-namespace rp2040 {
+namespace picohw {
 
 namespace {
 constexpr float kRSense = 0.11f;
@@ -229,8 +228,18 @@ Adafruit_BNO08x g_bno(-1);
 VL53L1X g_tof_front, g_tof_rear;
 Adafruit_SHT31 g_sht(&Wire);
 Adafruit_BMP3XX g_bmp;
-Adafruit_INA219 g_ina_drive(pins::kInaDrive), g_ina_exp(pins::kInaExpand);
 bool g_have_bno = false, g_have_tof_f = false, g_have_tof_r = false, g_have_sht = false, g_have_bmp = false;
+
+// INA219 read raw: shunt-voltage register (10 uV LSB) across a 10 mOhm shunt -> amps.
+float inaAmps(uint8_t addr) {
+  constexpr float kShuntOhm = 0.010f;
+  Wire.beginTransmission(addr);
+  Wire.write(0x01);
+  if (Wire.endTransmission(false) != 0) return 0.0f;
+  if (Wire.requestFrom(addr, static_cast<uint8_t>(2)) != 2) return 0.0f;
+  const int16_t raw = static_cast<int16_t>((Wire.read() << 8) | Wire.read());
+  return raw * 10e-6f / kShuntOhm;
+}
 
 int16_t adsRead(uint8_t ch) {
   // single-shot, +/-4.096 V, 860 SPS
@@ -332,8 +341,6 @@ void Board::beginCore1() {
   if (g_have_bno) g_bno.enableReport(SH2_GAME_ROTATION_VECTOR, 10000);
   g_have_sht = g_sht.begin(pins::kSht31);
   g_have_bmp = g_bmp.begin_I2C(pins::kBmp390, &Wire);
-  g_ina_drive.begin(&Wire);
-  g_ina_exp.begin(&Wire);
 }
 
 void Board::pollCore1() {
@@ -360,8 +367,8 @@ void Board::pollCore1() {
     c.tof_rear = g_tof_rear.read(false);
     c.tof_rear_ok = g_tof_rear.ranging_data.range_status == VL53L1X::RangeValid;
   }
-  c.power.drive_a = g_ina_drive.getCurrent_mA() * 1e-3f;
-  c.power.expand_a = g_ina_exp.getCurrent_mA() * 1e-3f;
+  c.power.drive_a = inaAmps(pins::kInaDrive);
+  c.power.expand_a = inaAmps(pins::kInaExpand);
   c.power.bus_v = adsVolts(pins::kAdsBus) * 20.0f;
   c.power.battery_v = adsVolts(pins::kAdsBattery) * 20.0f;
   c.power.mode = digitalRead(pins::kOnBattery) ? proto::SupplyMode::BATTERY : proto::SupplyMode::TETHER;
@@ -406,5 +413,5 @@ hal::Hardware Board::hardware() {
   return h;
 }
 
-}  // namespace rp2040
+}  // namespace picohw
 #endif

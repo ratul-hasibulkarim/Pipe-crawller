@@ -32,6 +32,8 @@ class ExpansionLoop {
   float gripMin() const;
   float gripAvg() const;
   bool allContact() const;
+  int contactCount() const;
+  float effForce(int arm) const;
   bool done() const { return done_; }
   bool stalled() const { return stall_; }
   bool overCurrent() const { return over_current_; }

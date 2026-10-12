@@ -15,13 +15,26 @@ constexpr float kTwoPi = 6.28318531f;
 
 float ExpansionLoop::diameter() const { return kin::diameterForTheta(theta_); }
 
-float ExpansionLoop::gripMin() const { return std::fmin(grip_[0], std::fmin(grip_[1], grip_[2])); }
-
-float ExpansionLoop::gripAvg() const { return (grip_[0] + grip_[1] + grip_[2]) / 3.0f; }
-
-bool ExpansionLoop::allContact() const {
-  return slide_[0] > params::CONTACT_SLIDE_MM && slide_[1] > params::CONTACT_SLIDE_MM && slide_[2] > params::CONTACT_SLIDE_MM;
+int ExpansionLoop::contactCount() const {
+  int n = 0;
+  for (float s : slide_) n += s > params::CONTACT_SLIDE_MM ? 1 : 0;
+  return n;
 }
+
+// Force on an arm for control purposes. The hall sensor only sees force above the spring
+// preload. In a horizontal pipe the body sags and the top arm drops below preload while
+// still touching: if the other two arms are loaded it is counted at preload (upper bound).
+float ExpansionLoop::effForce(int i) const {
+  if (slide_[i] > params::CONTACT_SLIDE_MM) return grip_[i];
+  return contactCount() >= 2 ? params::SPRING_PRELOAD_N : 0.0f;
+}
+
+float ExpansionLoop::gripMin() const { return std::fmin(effForce(0), std::fmin(effForce(1), effForce(2))); }
+
+float ExpansionLoop::gripAvg() const { return (effForce(0) + effForce(1) + effForce(2)) / 3.0f; }
+
+// Gripped = at least two arms loaded (the third is then held against the wall by geometry).
+bool ExpansionLoop::allContact() const { return contactCount() >= 2; }
 
 void ExpansionLoop::clearFaults() {
   stall_ = over_current_ = no_contact_ = false;
