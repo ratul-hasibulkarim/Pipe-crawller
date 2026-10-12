@@ -1,0 +1,19 @@
+{
+  "size": "M",
+  "collisions": [],
+  "pipe": [],
+  "positions": [
+    "theta=5.7deg pipe=150mm",
+    "theta=12.0deg pipe=175mm",
+    "theta=18.3deg pipe=200mm",
+    "theta=24.7deg pipe=224mm",
+    "theta=31.0deg pipe=246mm",
+    "theta=37.3deg pipe=268mm",
+    "theta=43.6deg pipe=287mm",
+    "theta=50.0deg pipe=305mm",
+    "theta=56.3deg pipe=320mm"
+  ],
+  "qty_errors": [],
+  "seconds": 67.1,
+  "passed": true
+}

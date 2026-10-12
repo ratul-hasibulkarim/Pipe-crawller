@@ -1,0 +1,141 @@
+{
+  "S": {
+    "mass": {
+      "by_module_kg": {
+        "A_body": 0.348,
+        "B_expansion": 0.359,
+        "C_wheel": 0.17,
+        "D_gimbal": 0.016,
+        "E_accessories": 0.043,
+        "purchased": 0.551
+      },
+      "total_kg": 1.486,
+      "allowance_frac": 0.12,
+      "with_allowance_kg": 1.664,
+      "target_kg": 1.8,
+      "cg_mm": [
+        -0.13,
+        -0.02,
+        55.55
+      ],
+      "cg_radial_offset_mm": 0.13,
+      "cg_offset_param_mm": 3
+    },
+    "fasteners": {
+      "M2.5x8 SHCS (radial)": 24,
+      "M2.5x10 SHCS": 8,
+      "M2.5x5 SHCS": 8,
+      "M2.5 heat-set insert": 8,
+      "M2.5x6 SHCS": 6,
+      "split collet clamp (Kevlar strength member)": 1,
+      "M3 set screw": 2,
+      "M2.5x10 SHCS (spine)": 4,
+      "oil-impregnated bronze bushing (pivot)": 6,
+      "E-clip": 28,
+      "M2x8 SHCS (eccentric)": 3,
+      "M2x6 SHCS": 16,
+      "M2.5x6 SHCS (pod)": 12,
+      "M2x5 SHCS": 4,
+      "M2 heat-set insert": 4,
+      "M2x4 SHCS": 4,
+      "centring torsion spring": 2,
+      "M2.5x8 SHCS": 8,
+      "hose clamp": 2
+    },
+    "errors": [],
+    "interference_passed": true
+  },
+  "M": {
+    "mass": {
+      "by_module_kg": {
+        "A_body": 0.681,
+        "B_expansion": 1.012,
+        "C_wheel": 0.459,
+        "D_gimbal": 0.03,
+        "E_accessories": 0.088,
+        "purchased": 1.302
+      },
+      "total_kg": 3.571,
+      "allowance_frac": 0.12,
+      "with_allowance_kg": 4.0,
+      "target_kg": 4.2,
+      "cg_mm": [
+        -0.2,
+        -0.03,
+        70.07
+      ],
+      "cg_radial_offset_mm": 0.21,
+      "cg_offset_param_mm": 5
+    },
+    "fasteners": {
+      "M3x8 SHCS (radial)": 24,
+      "M3x10 SHCS": 8,
+      "M2.5x5 SHCS": 8,
+      "M2.5 heat-set insert": 8,
+      "M3x6 SHCS": 6,
+      "split collet clamp (Kevlar strength member)": 1,
+      "M3 set screw": 2,
+      "M3x10 SHCS (spine)": 4,
+      "oil-impregnated bronze bushing (pivot)": 6,
+      "E-clip": 28,
+      "M2x8 SHCS (eccentric)": 3,
+      "M3x8 SHCS": 20,
+      "M3x6 SHCS (pod)": 12,
+      "M2x5 SHCS": 4,
+      "M2 heat-set insert": 4,
+      "M2x4 SHCS": 4,
+      "M2x6 SHCS": 4,
+      "centring torsion spring": 2,
+      "hose clamp": 2
+    },
+    "errors": [],
+    "interference_passed": true
+  },
+  "L": {
+    "mass": {
+      "by_module_kg": {
+        "A_body": 2.076,
+        "B_expansion": 4.609,
+        "C_wheel": 1.252,
+        "D_gimbal": 0.123,
+        "E_accessories": 0.313,
+        "purchased": 4.953
+      },
+      "total_kg": 13.327,
+      "allowance_frac": 0.12,
+      "with_allowance_kg": 14.926,
+      "target_kg": 15.0,
+      "cg_mm": [
+        0.09,
+        -0.06,
+        64.46
+      ],
+      "cg_radial_offset_mm": 0.11,
+      "cg_offset_param_mm": 8
+    },
+    "fasteners": {
+      "M4x8 SHCS (radial)": 24,
+      "M4x10 SHCS": 8,
+      "M2.5x5 SHCS": 8,
+      "M2.5 heat-set insert": 8,
+      "M4x6 SHCS": 6,
+      "split collet clamp (Kevlar strength member)": 1,
+      "M3 set screw": 2,
+      "M4x10 SHCS (spine)": 4,
+      "oil-impregnated bronze bushing (pivot)": 6,
+      "E-clip": 28,
+      "M2x8 SHCS (eccentric)": 3,
+      "M3x8 SHCS": 12,
+      "M4x6 SHCS (pod)": 12,
+      "M2x5 SHCS": 4,
+      "M2 heat-set insert": 4,
+      "M2x4 SHCS": 4,
+      "M2x6 SHCS": 4,
+      "centring torsion spring": 2,
+      "M4x8 SHCS": 8,
+      "hose clamp": 2
+    },
+    "errors": [],
+    "interference_passed": true
+  }
+}

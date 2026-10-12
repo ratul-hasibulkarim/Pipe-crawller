@@ -1,0 +1,596 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pipebot.schema.json",
+  "title": "PIPEBOT-X protocol v3",
+  "$defs": {
+    "Drive": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "DRIVE"
+        },
+        "seq": {
+          "type": "number"
+        },
+        "linear_mm_s": {
+          "type": "number"
+        },
+        "turn_deg_s": {
+          "type": "number"
+        },
+        "bend_dir_deg": {
+          "type": "number"
+        },
+        "ttl_ms": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "type",
+        "seq",
+        "linear_mm_s",
+        "turn_deg_s",
+        "bend_dir_deg",
+        "ttl_ms"
+      ]
+    },
+    "Expand": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "EXPAND"
+        },
+        "seq": {
+          "type": "number"
+        },
+        "mode": {
+          "enum": [
+            "DIAMETER",
+            "FORCE",
+            "RETRACT"
+          ]
+        },
+        "target": {
+          "type": "number"
+        },
+        "ttl_ms": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "type",
+        "seq",
+        "mode",
+        "target",
+        "ttl_ms"
+      ]
+    },
+    "Gimbal": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "GIMBAL"
+        },
+        "seq": {
+          "type": "number"
+        },
+        "pan_deg": {
+          "type": "number"
+        },
+        "tilt_deg": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "type",
+        "seq",
+        "pan_deg",
+        "tilt_deg"
+      ]
+    },
+    "Light": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "LIGHT"
+        },
+        "seq": {
+          "type": "number"
+        },
+        "white_pct": {
+          "type": "number"
+        },
+        "ir_pct": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "type",
+        "seq",
+        "white_pct",
+        "ir_pct"
+      ]
+    },
+    "Estop": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "ESTOP"
+        },
+        "seq": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "type",
+        "seq"
+      ]
+    },
+    "ClearFault": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "CLEAR_FAULT"
+        },
+        "seq": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "type",
+        "seq"
+      ]
+    },
+    "Ping": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "PING"
+        },
+        "seq": {
+          "type": "number"
+        },
+        "t_ms": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "type",
+        "seq",
+        "t_ms"
+      ]
+    },
+    "SetParam": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "SET_PARAM"
+        },
+        "seq": {
+          "type": "number"
+        },
+        "param": {
+          "enum": [
+            "DRIVE_KP",
+            "DRIVE_KI",
+            "DRIVE_KD",
+            "EXPAND_KP",
+            "EXPAND_KI",
+            "DRIVE_CURRENT_A",
+            "EXPAND_CURRENT_A",
+            "DRIVE_TTL_MS",
+            "EXPAND_TTL_MS",
+            "WHEEL_DIA_MM",
+            "GRIP_TARGET_N",
+            "ODOM_RESET"
+          ]
+        },
+        "value": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "type",
+        "seq",
+        "param",
+        "value"
+      ]
+    },
+    "Telemetry": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "TELEMETRY"
+        },
+        "t_ms": {
+          "type": "number"
+        },
+        "state": {
+          "enum": [
+            "IDLE",
+            "EXPANDING",
+            "GRIPPED",
+            "CRAWLING",
+            "HOLDING",
+            "RETRACTING",
+            "FAULT",
+            "LOW_POWER_SAFE"
+          ]
+        },
+        "faults": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "SLIP_WARNING",
+              "GROUND_SLIP",
+              "OVERCURRENT",
+              "OVERTEMP",
+              "THERMAL_DERATE",
+              "LOW_BATTERY",
+              "CRITICAL_BATTERY",
+              "SUPPLY_UNDERVOLT",
+              "HEARTBEAT_LOST",
+              "ESTOP",
+              "EXPANSION_STALL",
+              "GRIP_LOW",
+              "NO_CONTACT",
+              "IMU_FAIL",
+              "TOF_FAIL",
+              "ENCODER_FAIL",
+              "WATCHDOG_RESET",
+              "COMMAND_STALE"
+            ]
+          }
+        },
+        "est_diameter_mm": {
+          "type": "number"
+        },
+        "lever_angle_deg": {
+          "type": "number"
+        },
+        "grip_force_n": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "axis_offset_mm": {
+          "type": "number"
+        },
+        "linear_mm_s": {
+          "type": "number"
+        },
+        "distance_m": {
+          "type": "number"
+        },
+        "odom_confidence": {
+          "type": "number"
+        },
+        "imu": {
+          "type": "object",
+          "properties": {
+            "pitch": {
+              "type": "number"
+            },
+            "roll": {
+              "type": "number"
+            },
+            "yaw": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "pitch",
+            "roll",
+            "yaw"
+          ]
+        },
+        "pipe_orientation_deg": {
+          "type": "number"
+        },
+        "motor_current_a": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "driver_temp_c": {
+          "type": "number"
+        },
+        "battery": {
+          "type": "object",
+          "properties": {
+            "v": {
+              "type": "number"
+            },
+            "pct": {
+              "type": "number"
+            },
+            "current_a": {
+              "type": "number"
+            },
+            "supply": {
+              "enum": [
+                "TETHER",
+                "BATTERY"
+              ]
+            }
+          },
+          "required": [
+            "v",
+            "pct",
+            "current_a",
+            "supply"
+          ]
+        },
+        "env": {
+          "type": "object",
+          "properties": {
+            "temp_c": {
+              "type": "number"
+            },
+            "humidity_pct": {
+              "type": "number"
+            },
+            "pressure_kpa": {
+              "type": "number"
+            },
+            "gas_ppm": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "temp_c",
+            "humidity_pct",
+            "pressure_kpa",
+            "gas_ppm"
+          ]
+        },
+        "tof_front_mm": {
+          "type": "number"
+        },
+        "tof_rear_mm": {
+          "type": "number"
+        },
+        "gimbal": {
+          "type": "object",
+          "properties": {
+            "pan_deg": {
+              "type": "number"
+            },
+            "tilt_deg": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "pan_deg",
+            "tilt_deg"
+          ]
+        },
+        "light": {
+          "type": "object",
+          "properties": {
+            "white_pct": {
+              "type": "number"
+            },
+            "ir_pct": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "white_pct",
+            "ir_pct"
+          ]
+        },
+        "last_seq": {
+          "type": "number"
+        },
+        "rx_errors": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "type",
+        "t_ms",
+        "state",
+        "faults",
+        "est_diameter_mm",
+        "lever_angle_deg",
+        "grip_force_n",
+        "axis_offset_mm",
+        "linear_mm_s",
+        "distance_m",
+        "odom_confidence",
+        "imu",
+        "pipe_orientation_deg",
+        "motor_current_a",
+        "driver_temp_c",
+        "battery",
+        "env",
+        "tof_front_mm",
+        "tof_rear_mm",
+        "gimbal",
+        "light",
+        "last_seq",
+        "rx_errors"
+      ]
+    },
+    "Ack": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "ACK"
+        },
+        "seq": {
+          "type": "number"
+        },
+        "cmd": {
+          "type": "number"
+        },
+        "status": {
+          "enum": [
+            "OK",
+            "REJECTED",
+            "STALE",
+            "ESTOPPED",
+            "FAULTED",
+            "BAD_ARG"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "seq",
+        "cmd",
+        "status"
+      ]
+    },
+    "Pong": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "PONG"
+        },
+        "seq": {
+          "type": "number"
+        },
+        "t_ms": {
+          "type": "number"
+        },
+        "mcu_ms": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "type",
+        "seq",
+        "t_ms",
+        "mcu_ms"
+      ]
+    },
+    "Event": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "EVENT"
+        },
+        "t_ms": {
+          "type": "number"
+        },
+        "code": {
+          "enum": [
+            "STATE_CHANGE",
+            "FAULT_SET",
+            "FAULT_CLEARED",
+            "CONTACT",
+            "REGRIP",
+            "BOOT"
+          ]
+        },
+        "state": {
+          "enum": [
+            "IDLE",
+            "EXPANDING",
+            "GRIPPED",
+            "CRAWLING",
+            "HOLDING",
+            "RETRACTING",
+            "FAULT",
+            "LOW_POWER_SAFE"
+          ]
+        },
+        "arg": {
+          "type": "number"
+        },
+        "value": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "type",
+        "t_ms",
+        "code",
+        "state",
+        "arg",
+        "value"
+      ]
+    },
+    "ParamValue": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "PARAM_VALUE"
+        },
+        "param": {
+          "enum": [
+            "DRIVE_KP",
+            "DRIVE_KI",
+            "DRIVE_KD",
+            "EXPAND_KP",
+            "EXPAND_KI",
+            "DRIVE_CURRENT_A",
+            "EXPAND_CURRENT_A",
+            "DRIVE_TTL_MS",
+            "EXPAND_TTL_MS",
+            "WHEEL_DIA_MM",
+            "GRIP_TARGET_N",
+            "ODOM_RESET"
+          ]
+        },
+        "value": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "type",
+        "param",
+        "value"
+      ]
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/Drive"
+    },
+    {
+      "$ref": "#/$defs/Expand"
+    },
+    {
+      "$ref": "#/$defs/Gimbal"
+    },
+    {
+      "$ref": "#/$defs/Light"
+    },
+    {
+      "$ref": "#/$defs/Estop"
+    },
+    {
+      "$ref": "#/$defs/ClearFault"
+    },
+    {
+      "$ref": "#/$defs/Ping"
+    },
+    {
+      "$ref": "#/$defs/SetParam"
+    },
+    {
+      "$ref": "#/$defs/Telemetry"
+    },
+    {
+      "$ref": "#/$defs/Ack"
+    },
+    {
+      "$ref": "#/$defs/Pong"
+    },
+    {
+      "$ref": "#/$defs/Event"
+    },
+    {
+      "$ref": "#/$defs/ParamValue"
+    }
+  ]
+}

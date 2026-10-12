@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.pio/
+firmware/build/
+cad/exports/*/stl/
+node_modules/
+app/dist/
+pi/recordings/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/

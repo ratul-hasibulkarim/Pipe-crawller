@@ -1,0 +1,231 @@
+size,part,module,qty,material,process,unit_mass_g,unit_cost_usd,line_cost_usd,vendor,notes
+S,body_front_shell,A_body,1,6061-T6,CNC / waterjet,192.9,28.94,28.94,TBD (quote),Houses gimbal and compute board; dry compartment (IP68).
+S,body_mid_chassis,A_body,1,6061-T6,CNC / waterjet,49.6,15.0,15.0,TBD (quote),Spine carries all inter-pod wiring (no cable crosses an arm joint).
+S,body_rear_shell,A_body,1,6061-T6,CNC / waterjet,61.1,15.0,15.0,TBD (quote),"Machined 6061 tube, hard-anodised. Bore holds the planetary flange ring."
+S,electronics_tray,A_body,1,PA12-CF,FDM / SLS,12.5,2.99,2.99,TBD (quote),
+S,tether_strain_relief,A_body,1,6061-T6,CNC / waterjet,31.3,15.0,15.0,TBD (quote),"Tether load path: Kevlar member clamps in the collet to the cap, never to the PCB. Pull-test 200 N."
+S,bevel_crown,B_expansion,1,42CrMo4,CNC + induction hardened,10.2,15.0,15.0,TBD (quote),
+S,bevel_pinion,B_expansion,3,42CrMo4,CNC + induction hardened,1.5,15.0,45.0,TBD (quote),
+S,expansion_worm,B_expansion,3,42CrMo4,CNC + induction hardened,17.3,15.0,45.0,TBD (quote),"Single-start, lead angle 3.58 deg: self-locking."
+S,gearbox_bulkhead,B_expansion,1,6061-T6,CNC / waterjet,95.4,15.0,15.0,TBD (quote),Flooded gearbox (marine grease). Sector slots are open by design; dry pods are separately sealed.
+S,lever_plate,B_expansion,6,6061-T6,CNC / waterjet,7.3,15.0,90.0,TBD (quote),Waterjet 6061-T6 plate; D-hole keys it to the pivot shaft.
+S,pivot_shaft,B_expansion,3,42CrMo4,CNC + induction hardened,11.0,15.0,45.0,TBD (quote),
+S,worm_bearing_block,B_expansion,6,CuSn12,CNC (hobbed),1.4,15.0,90.0,TBD (quote),
+S,worm_sector,B_expansion,3,CuSn12,CNC (hobbed),37.1,15.0,45.0,TBD (quote),Keyed (D-flat) on the pivot shaft; teeth hobbed to match the worm.
+S,belt_tensioner,C_wheel,3,POM,CNC,0.1,15.0,45.0,TBD (quote),
+S,compliance_spring_retainer,C_wheel,6,SS316,CNC,0.5,15.0,90.0,TBD (quote),Spec 'return_spring_retainer'. Hall sensor (DRV5055) on the cap reads the stub-pin magnet.
+S,drive_motor_mount,C_wheel,3,6061-T6,CNC / waterjet,1.4,15.0,45.0,TBD (quote),
+S,rocker_plate,C_wheel,6,6061-T6,CNC / waterjet,15.1,15.0,90.0,TBD (quote),Spec 'arm_carriage': carries both axles + the drive pod.
+S,slide_bushing,C_wheel,6,POM,CNC,0.0,15.0,90.0,TBD (quote),
+S,stub_pin,C_wheel,6,42CrMo4,CNC + induction hardened,0.3,15.0,90.0,TBD (quote),
+S,wheel_axle,C_wheel,6,42CrMo4,CNC + induction hardened,3.1,15.0,90.0,TBD (quote),
+S,wheel_crown_mold,C_wheel,0,PETG,FDM,17.9,2.0,0.0,TBD (quote),"Tooling: print 2 halves, mirror one. Sprue + 2 dowel pins."
+S,wheel_hub,C_wheel,6,PA12-CF,FDM / SLS,5.6,2.0,12.0,TBD (quote),"Printed flat (axis vertical); D-bore, no supports."
+S,wheel_tread,C_wheel,6,silicone-60A,cast in mold,2.9,3.0,18.0,TBD (quote),"Crown radius 18 mm; mu dry 0.75, wet 0.42."
+S,camera_window,D_gimbal,1,PC,vacuum-formed / machined,6.1,5.0,5.0,TBD (quote),"Anti-fog: hydrophilic coating + 0.5 W heater trace on the flange; replaceable, O-ring sealed."
+S,gimbal_pan_yoke,D_gimbal,1,PA12-CF,FDM / SLS,5.0,2.0,2.0,TBD (quote),Continuous pan: ring gear (m0.5) driven by the static gearmotor; AS5600 magnet on the hub.
+S,gimbal_tilt_cradle,D_gimbal,1,PA12-CF,FDM / SLS,1.1,2.0,2.0,TBD (quote),
+S,led_ring_mount,D_gimbal,1,PA12-CF,FDM / SLS,3.3,2.0,2.0,TBD (quote),
+S,articulation_spider,E_accessories,1,SS316,CNC,1.6,15.0,15.0,TBD (quote),"Joint range +/-45 deg, spring-centred."
+S,articulation_yoke_front,E_accessories,1,SS316,CNC,17.0,15.0,15.0,TBD (quote),
+S,articulation_yoke_rear,E_accessories,1,SS316,CNC,15.5,15.0,15.0,TBD (quote),
+S,joint_boot,E_accessories,1,EPDM,moulded,4.6,1.0,1.0,TBD (quote),
+S,nose_bumper,E_accessories,1,silicone-60A,cast in mold,2.3,3.0,3.0,TBD (quote),"Sits in a 1.5 mm groove behind the LED ring, 0.5 mm proud: takes wall strikes without shadowing the 45 deg LEDs."
+S,pipe_size_adapter,E_accessories,0,silicone-60A,cast in mold,7.0,3.0,0.0,TBD (quote),Range kit: extends max pipe ID by 8 mm (to 208 mm). 6 per kit.
+S,service_hatch_gasket,E_accessories,6,EPDM,moulded,0.3,1.0,6.0,TBD (quote),"O-ring ID 50.1 x 1.5 mm (cap, shell/gearbox, spine, front shell, dome, gland)."
+S,bearing_MR74ZZ,purchased,12,steel,purchased,0.4,0.7,8.4,TBD (catalogue),
+S,buck_48v_12v_5v,purchased,1,PCB,purchased,10.0,6,6,TBD (catalogue),
+S,camera_module,purchased,1,PCB,purchased,4.0,35,35,TBD (catalogue),
+S,compute_Pi_Zero_2_W,purchased,1,PCB,purchased,11.0,15,15,TBD (catalogue),
+S,drive_belt_GT2,purchased,3,rubber/glass,purchased,1.1,0.8555044166691297,2.57,TBD (catalogue),
+S,drive_stepper_NEMA8,purchased,3,steel/copper,purchased,80.0,18,54,TBD (catalogue),
+S,drive_worm_gearbox_35to1,purchased,3,Zn/steel,purchased,12.0,20,60,TBD (catalogue),"Self-locking worm (lead angle 3 deg), rated torque in bot_params."
+S,expansion_motor_NEMA14,purchased,1,steel/copper,purchased,140.0,14,14,TBD (catalogue),
+S,mcu_board_RP2040,purchased,1,PCB,purchased,12.0,45,45,TBD (catalogue),
+S,pan_gearmotor_n20,purchased,1,steel,purchased,10.0,6,6,TBD (catalogue),
+S,planetary_5to1,purchased,1,steel,purchased,61.9,25,25,TBD (catalogue),
+S,slip_ring_6w,purchased,1,mixed,purchased,10.0,18,18,TBD (catalogue),
+S,tilt_servo_nano,purchased,1,plastic,purchased,4.5,9,9,TBD (catalogue),
+S,timing_pulley_GT2,purchased,9,Al,purchased,0.4,3.0,27.0,TBD (catalogue),
+S,tether (per m),purchased,1,-,purchased,,6,6,TBD (catalogue),
+S,compliance spring,purchased,6,-,purchased,,0.5,3.0,TBD (catalogue),
+S,hall sensor + magnet,purchased,6,-,purchased,,1.5,9.0,TBD (catalogue),
+S,LED white 1 W,purchased,4,-,purchased,,1.5,6.0,TBD (catalogue),
+S,LED IR 850 nm,purchased,2,-,purchased,,2,4,TBD (catalogue),
+S,VL53L1X ToF,purchased,2,-,purchased,,9,18,TBD (catalogue),
+S,BNO085 IMU,purchased,1,-,purchased,,20,20,TBD (catalogue),
+S,SHT31 / BMP390 / INA219 breakouts,purchased,1,-,purchased,,15.0,15.0,TBD (catalogue),
+S,E-clip,fastener,28,A2 stainless,purchased,,0.08,2.24,TBD,
+S,M2 heat-set insert,fastener,4,A2 stainless,purchased,,0.08,0.32,TBD,
+S,M2.5 heat-set insert,fastener,8,A2 stainless,purchased,,0.08,0.64,TBD,
+S,M2.5x10 SHCS,fastener,8,A2 stainless,purchased,,0.08,0.64,TBD,
+S,M2.5x10 SHCS (spine),fastener,4,A2 stainless,purchased,,0.08,0.32,TBD,
+S,M2.5x5 SHCS,fastener,8,A2 stainless,purchased,,0.08,0.64,TBD,
+S,M2.5x6 SHCS,fastener,6,A2 stainless,purchased,,0.08,0.48,TBD,
+S,M2.5x6 SHCS (pod),fastener,12,A2 stainless,purchased,,0.08,0.96,TBD,
+S,M2.5x8 SHCS,fastener,8,A2 stainless,purchased,,0.08,0.64,TBD,
+S,M2.5x8 SHCS (radial),fastener,24,A2 stainless,purchased,,0.08,1.92,TBD,
+S,M2x4 SHCS,fastener,4,A2 stainless,purchased,,0.08,0.32,TBD,
+S,M2x5 SHCS,fastener,4,A2 stainless,purchased,,0.08,0.32,TBD,
+S,M2x6 SHCS,fastener,16,A2 stainless,purchased,,0.08,1.28,TBD,
+S,M2x8 SHCS (eccentric),fastener,3,A2 stainless,purchased,,0.08,0.24,TBD,
+S,M3 set screw,fastener,2,A2 stainless,purchased,,0.08,0.16,TBD,
+S,centring torsion spring,fastener,2,A2 stainless,purchased,,0.08,0.16,TBD,
+S,hose clamp,fastener,2,A2 stainless,purchased,,0.08,0.16,TBD,
+S,oil-impregnated bronze bushing (pivot),fastener,6,A2 stainless,purchased,,0.08,0.48,TBD,
+S,split collet clamp (Kevlar strength member),fastener,1,A2 stainless,purchased,,0.08,0.08,TBD,
+M,battery_caddy,A_body,1,PA12-CF,FDM / SLS,1.2,2.0,2.0,TBD (quote),End caps only; cells wrapped in Kapton + fish paper inside the spine.
+M,body_front_shell,A_body,1,6061-T6,CNC / waterjet,294.4,44.16,44.16,TBD (quote),Houses gimbal and compute board; dry compartment (IP68).
+M,body_mid_chassis,A_body,1,6061-T6,CNC / waterjet,179.2,26.89,26.89,TBD (quote),Spine carries all inter-pod wiring (no cable crosses an arm joint).
+M,body_rear_shell,A_body,1,6061-T6,CNC / waterjet,130.1,19.52,19.52,TBD (quote),"Machined 6061 tube, hard-anodised. Bore holds the planetary flange ring."
+M,electronics_tray,A_body,1,PA12-CF,FDM / SLS,18.0,4.32,4.32,TBD (quote),
+M,tether_strain_relief,A_body,1,6061-T6,CNC / waterjet,58.2,15.0,15.0,TBD (quote),"Tether load path: Kevlar member clamps in the collet to the cap, never to the PCB. Pull-test 200 N."
+M,bevel_crown,B_expansion,1,42CrMo4,CNC + induction hardened,41.6,15.0,15.0,TBD (quote),
+M,bevel_pinion,B_expansion,3,42CrMo4,CNC + induction hardened,1.7,15.0,45.0,TBD (quote),
+M,expansion_worm,B_expansion,3,42CrMo4,CNC + induction hardened,61.4,15.0,45.0,TBD (quote),"Single-start, lead angle 3.58 deg: self-locking."
+M,gearbox_bulkhead,B_expansion,1,6061-T6,CNC / waterjet,264.3,39.64,39.64,TBD (quote),Flooded gearbox (marine grease). Sector slots are open by design; dry pods are separately sealed.
+M,lever_plate,B_expansion,6,6061-T6,CNC / waterjet,17.9,15.0,90.0,TBD (quote),Waterjet 6061-T6 plate; D-hole keys it to the pivot shaft.
+M,pivot_shaft,B_expansion,3,42CrMo4,CNC + induction hardened,36.5,15.0,45.0,TBD (quote),
+M,worm_bearing_block,B_expansion,6,CuSn12,CNC (hobbed),1.9,15.0,90.0,TBD (quote),
+M,worm_sector,B_expansion,3,CuSn12,CNC (hobbed),96.1,34.6,103.8,TBD (quote),Keyed (D-flat) on the pivot shaft; teeth hobbed to match the worm.
+M,belt_tensioner,C_wheel,3,POM,CNC,0.4,15.0,45.0,TBD (quote),
+M,compliance_spring_retainer,C_wheel,6,SS316,CNC,0.6,15.0,90.0,TBD (quote),Spec 'return_spring_retainer'. Hall sensor (DRV5055) on the cap reads the stub-pin magnet.
+M,drive_motor_mount,C_wheel,3,6061-T6,CNC / waterjet,4.7,15.0,45.0,TBD (quote),
+M,rocker_plate,C_wheel,6,6061-T6,CNC / waterjet,29.2,15.0,90.0,TBD (quote),Spec 'arm_carriage': carries both axles + the drive pod.
+M,slide_bushing,C_wheel,6,POM,CNC,0.1,15.0,90.0,TBD (quote),
+M,stub_pin,C_wheel,6,42CrMo4,CNC + induction hardened,0.7,15.0,90.0,TBD (quote),
+M,wheel_axle,C_wheel,6,42CrMo4,CNC + induction hardened,11.1,15.0,90.0,TBD (quote),
+M,wheel_crown_mold,C_wheel,0,PETG,FDM,38.7,2.9,0.0,TBD (quote),"Tooling: print 2 halves, mirror one. Sprue + 2 dowel pins."
+M,wheel_hub,C_wheel,6,PA12-CF,FDM / SLS,21.5,5.15,30.9,TBD (quote),"Printed flat (axis vertical); D-bore, no supports."
+M,wheel_tread,C_wheel,6,silicone-60A,cast in mold,10.7,3.0,18.0,TBD (quote),"Crown radius 28 mm; mu dry 0.75, wet 0.42."
+M,camera_window,D_gimbal,1,PC,vacuum-formed / machined,15.0,5.0,5.0,TBD (quote),"Anti-fog: hydrophilic coating + 0.5 W heater trace on the flange; replaceable, O-ring sealed."
+M,gimbal_pan_yoke,D_gimbal,1,PA12-CF,FDM / SLS,5.0,2.0,2.0,TBD (quote),Continuous pan: ring gear (m0.5) driven by the static gearmotor; AS5600 magnet on the hub.
+M,gimbal_tilt_cradle,D_gimbal,1,PA12-CF,FDM / SLS,1.1,2.0,2.0,TBD (quote),
+M,led_ring_mount,D_gimbal,1,PA12-CF,FDM / SLS,8.4,2.02,2.02,TBD (quote),
+M,articulation_spider,E_accessories,1,SS316,CNC,4.2,15.0,15.0,TBD (quote),"Joint range +/-45 deg, spring-centred."
+M,articulation_yoke_front,E_accessories,1,SS316,CNC,34.4,15.0,15.0,TBD (quote),
+M,articulation_yoke_rear,E_accessories,1,SS316,CNC,30.8,15.0,15.0,TBD (quote),
+M,joint_boot,E_accessories,1,EPDM,moulded,8.8,1.0,1.0,TBD (quote),
+M,nose_bumper,E_accessories,1,silicone-60A,cast in mold,4.3,3.0,3.0,TBD (quote),"Sits in a 1.5 mm groove behind the LED ring, 0.5 mm proud: takes wall strikes without shadowing the 45 deg LEDs."
+M,pipe_size_adapter,E_accessories,0,silicone-60A,cast in mold,24.2,3.88,0.0,TBD (quote),Range kit: extends max pipe ID by 12 mm (to 332 mm). 6 per kit.
+M,service_hatch_gasket,E_accessories,6,EPDM,moulded,0.8,1.0,6.0,TBD (quote),"O-ring ID 71.6 x 2.0 mm (cap, shell/gearbox, spine, front shell, dome, gland)."
+M,bearing_MR106ZZ,purchased,12,steel,purchased,0.9,0.8,9.6,TBD (catalogue),
+M,buck_48v_12v_5v,purchased,1,PCB,purchased,10.0,6,6,TBD (catalogue),
+M,camera_module,purchased,1,PCB,purchased,4.0,35,35,TBD (catalogue),
+M,cell_18650,purchased,4,Li-ion,purchased,47.0,5,20,TBD (catalogue),
+M,compute_CM4,purchased,1,PCB,purchased,45.0,75,75,TBD (catalogue),
+M,drive_belt_GT2,purchased,3,rubber/glass,purchased,3.4,1.353309721495182,4.06,TBD (catalogue),
+M,drive_stepper_NEMA14,purchased,3,steel/copper,purchased,140.0,14,42,TBD (catalogue),
+M,drive_worm_gearbox_20to1,purchased,3,Zn/steel,purchased,50.3,25,75,TBD (catalogue),"Self-locking worm (lead angle 3 deg), rated torque in bot_params."
+M,expansion_motor_NEMA17,purchased,1,steel/copper,purchased,280.0,12,12,TBD (catalogue),
+M,mcu_board_RP2040,purchased,1,PCB,purchased,12.0,45,45,TBD (catalogue),
+M,pan_gearmotor_n20,purchased,1,steel,purchased,10.0,6,6,TBD (catalogue),
+M,planetary_5to1,purchased,1,steel,purchased,134.0,30,30,TBD (catalogue),
+M,slip_ring_6w,purchased,1,mixed,purchased,10.0,18,18,TBD (catalogue),
+M,tilt_servo_nano,purchased,1,plastic,purchased,4.5,9,9,TBD (catalogue),
+M,timing_pulley_GT2,purchased,9,Al,purchased,1.4,3.0,27.0,TBD (catalogue),
+M,tether (per m),purchased,1,-,purchased,,6,6,TBD (catalogue),
+M,compliance spring,purchased,6,-,purchased,,0.5,3.0,TBD (catalogue),
+M,hall sensor + magnet,purchased,6,-,purchased,,1.5,9.0,TBD (catalogue),
+M,LED white 1 W,purchased,4,-,purchased,,1.5,6.0,TBD (catalogue),
+M,LED IR 850 nm,purchased,2,-,purchased,,2,4,TBD (catalogue),
+M,VL53L1X ToF,purchased,2,-,purchased,,9,18,TBD (catalogue),
+M,BNO085 IMU,purchased,1,-,purchased,,20,20,TBD (catalogue),
+M,SHT31 / BMP390 / INA219 breakouts,purchased,1,-,purchased,,15.0,15.0,TBD (catalogue),
+M,E-clip,fastener,28,A2 stainless,purchased,,0.08,2.24,TBD,
+M,M2 heat-set insert,fastener,4,A2 stainless,purchased,,0.08,0.32,TBD,
+M,M2.5 heat-set insert,fastener,8,A2 stainless,purchased,,0.08,0.64,TBD,
+M,M2.5x5 SHCS,fastener,8,A2 stainless,purchased,,0.08,0.64,TBD,
+M,M2x4 SHCS,fastener,4,A2 stainless,purchased,,0.08,0.32,TBD,
+M,M2x5 SHCS,fastener,4,A2 stainless,purchased,,0.08,0.32,TBD,
+M,M2x6 SHCS,fastener,4,A2 stainless,purchased,,0.08,0.32,TBD,
+M,M2x8 SHCS (eccentric),fastener,3,A2 stainless,purchased,,0.08,0.24,TBD,
+M,M3 set screw,fastener,2,A2 stainless,purchased,,0.08,0.16,TBD,
+M,M3x10 SHCS,fastener,8,A2 stainless,purchased,,0.08,0.64,TBD,
+M,M3x10 SHCS (spine),fastener,4,A2 stainless,purchased,,0.08,0.32,TBD,
+M,M3x6 SHCS,fastener,6,A2 stainless,purchased,,0.08,0.48,TBD,
+M,M3x6 SHCS (pod),fastener,12,A2 stainless,purchased,,0.08,0.96,TBD,
+M,M3x8 SHCS,fastener,20,A2 stainless,purchased,,0.08,1.6,TBD,
+M,M3x8 SHCS (radial),fastener,24,A2 stainless,purchased,,0.08,1.92,TBD,
+M,centring torsion spring,fastener,2,A2 stainless,purchased,,0.08,0.16,TBD,
+M,hose clamp,fastener,2,A2 stainless,purchased,,0.08,0.16,TBD,
+M,oil-impregnated bronze bushing (pivot),fastener,6,A2 stainless,purchased,,0.08,0.48,TBD,
+M,split collet clamp (Kevlar strength member),fastener,1,A2 stainless,purchased,,0.08,0.08,TBD,
+L,battery_caddy,A_body,1,PA12-CF,FDM / SLS,14.5,3.48,3.48,TBD (quote),
+L,body_front_shell,A_body,1,6061-T6,CNC / waterjet,875.4,131.31,131.31,TBD (quote),Houses gimbal and compute board; dry compartment (IP68).
+L,body_mid_chassis,A_body,1,6061-T6,CNC / waterjet,381.1,57.16,57.16,TBD (quote),Spine carries all inter-pod wiring (no cable crosses an arm joint).
+L,body_rear_shell,A_body,1,6061-T6,CNC / waterjet,532.6,79.89,79.89,TBD (quote),"Machined 6061 tube, hard-anodised. Bore holds the planetary flange ring."
+L,electronics_tray,A_body,1,PA12-CF,FDM / SLS,35.0,8.39,8.39,TBD (quote),
+L,tether_strain_relief,A_body,1,6061-T6,CNC / waterjet,237.7,35.65,35.65,TBD (quote),"Tether load path: Kevlar member clamps in the collet to the cap, never to the PCB. Pull-test 200 N."
+L,bevel_crown,B_expansion,1,42CrMo4,CNC + induction hardened,234.7,56.34,56.34,TBD (quote),
+L,bevel_pinion,B_expansion,3,42CrMo4,CNC + induction hardened,23.7,15.0,45.0,TBD (quote),
+L,expansion_worm,B_expansion,3,42CrMo4,CNC + induction hardened,322.6,77.43,232.29,TBD (quote),"Single-start, lead angle 3.58 deg: self-locking."
+L,gearbox_bulkhead,B_expansion,1,6061-T6,CNC / waterjet,1192.6,178.89,178.89,TBD (quote),Flooded gearbox (marine grease). Sector slots are open by design; dry pods are separately sealed.
+L,lever_plate,B_expansion,6,6061-T6,CNC / waterjet,103.8,15.58,93.48,TBD (quote),Waterjet 6061-T6 plate; D-hole keys it to the pivot shaft.
+L,pivot_shaft,B_expansion,3,42CrMo4,CNC + induction hardened,152.3,36.56,109.68,TBD (quote),
+L,worm_bearing_block,B_expansion,6,CuSn12,CNC (hobbed),2.9,15.0,90.0,TBD (quote),
+L,worm_sector,B_expansion,3,CuSn12,CNC (hobbed),348.5,125.47,376.41,TBD (quote),Keyed (D-flat) on the pivot shaft; teeth hobbed to match the worm.
+L,belt_tensioner,C_wheel,3,POM,CNC,1.4,15.0,45.0,TBD (quote),
+L,compliance_spring_retainer,C_wheel,6,SS316,CNC,0.8,15.0,90.0,TBD (quote),Spec 'return_spring_retainer'. Hall sensor (DRV5055) on the cap reads the stub-pin magnet.
+L,drive_motor_mount,C_wheel,3,6061-T6,CNC / waterjet,12.4,15.0,45.0,TBD (quote),
+L,rocker_plate,C_wheel,6,6061-T6,CNC / waterjet,80.4,15.0,90.0,TBD (quote),Spec 'arm_carriage': carries both axles + the drive pod.
+L,slide_bushing,C_wheel,6,POM,CNC,0.1,15.0,90.0,TBD (quote),
+L,stub_pin,C_wheel,6,42CrMo4,CNC + induction hardened,2.3,15.0,90.0,TBD (quote),
+L,wheel_axle,C_wheel,6,42CrMo4,CNC + induction hardened,30.0,15.0,90.0,TBD (quote),
+L,wheel_crown_mold,C_wheel,0,PETG,FDM,90.2,6.77,0.0,TBD (quote),"Tooling: print 2 halves, mirror one. Sprue + 2 dowel pins."
+L,wheel_hub,C_wheel,6,PA12-CF,FDM / SLS,48.5,11.64,69.84,TBD (quote),"Printed flat (axis vertical); D-bore, no supports."
+L,wheel_tread,C_wheel,6,silicone-60A,cast in mold,39.7,6.35,38.1,TBD (quote),"Crown radius 45 mm; mu dry 0.75, wet 0.42."
+L,camera_window,D_gimbal,1,PC,vacuum-formed / machined,62.4,7.49,7.49,TBD (quote),"Anti-fog: hydrophilic coating + 0.5 W heater trace on the flange; replaceable, O-ring sealed."
+L,gimbal_pan_yoke,D_gimbal,1,PA12-CF,FDM / SLS,8.8,2.12,2.12,TBD (quote),Continuous pan: ring gear (m0.5) driven by the static gearmotor; AS5600 magnet on the hub.
+L,gimbal_tilt_cradle,D_gimbal,1,PA12-CF,FDM / SLS,1.1,2.0,2.0,TBD (quote),
+L,led_ring_mount,D_gimbal,1,PA12-CF,FDM / SLS,51.0,12.23,12.23,TBD (quote),
+L,articulation_spider,E_accessories,1,SS316,CNC,24.2,15.0,15.0,TBD (quote),"Joint range +/-45 deg, spring-centred."
+L,articulation_yoke_front,E_accessories,1,SS316,CNC,128.8,27.05,27.05,TBD (quote),
+L,articulation_yoke_rear,E_accessories,1,SS316,CNC,108.0,22.68,22.68,TBD (quote),
+L,joint_boot,E_accessories,1,EPDM,moulded,26.0,2.34,2.34,TBD (quote),
+L,nose_bumper,E_accessories,1,silicone-60A,cast in mold,11.5,3.0,3.0,TBD (quote),"Sits in a 1.5 mm groove behind the LED ring, 0.5 mm proud: takes wall strikes without shadowing the 45 deg LEDs."
+L,pipe_size_adapter,E_accessories,0,silicone-60A,cast in mold,90.3,14.45,0.0,TBD (quote),Range kit: extends max pipe ID by 20 mm (to 670 mm). 6 per kit.
+L,service_hatch_gasket,E_accessories,6,EPDM,moulded,2.4,1.0,6.0,TBD (quote),"O-ring ID 132.1 x 2.5 mm (cap, shell/gearbox, spine, front shell, dome, gland)."
+L,bearing_MR128ZZ,purchased,12,steel,purchased,1.3,0.9,10.8,TBD (catalogue),
+L,buck_48v_12v_5v,purchased,1,PCB,purchased,10.0,6,6,TBD (catalogue),
+L,camera_module,purchased,1,PCB,purchased,4.0,35,35,TBD (catalogue),
+L,cell_18650,purchased,12,Li-ion,purchased,47.0,5,60,TBD (catalogue),
+L,compute_Pi_5,purchased,1,PCB,purchased,46.0,80,80,TBD (catalogue),
+L,drive_belt_GT2,purchased,3,rubber/glass,purchased,9.0,2.08001767873426,6.24,TBD (catalogue),
+L,drive_stepper_NEMA23,purchased,3,steel/copper,purchased,700.0,25,75,TBD (catalogue),
+L,drive_worm_gearbox_21to1,purchased,3,Zn/steel,purchased,206.6,45,135,TBD (catalogue),"Self-locking worm (lead angle 3 deg), rated torque in bot_params."
+L,expansion_motor_NEMA23L,purchased,1,steel/copper,purchased,1000.0,32,32,TBD (catalogue),
+L,mcu_board_RP2040,purchased,1,PCB,purchased,12.0,45,45,TBD (catalogue),
+L,pan_gearmotor_ga25,purchased,1,steel,purchased,90.0,12,12,TBD (catalogue),
+L,planetary_10to1,purchased,1,steel,purchased,397.1,60,60,TBD (catalogue),
+L,slip_ring_6w,purchased,1,mixed,purchased,10.0,18,18,TBD (catalogue),
+L,tilt_servo_micro,purchased,1,plastic,purchased,13.0,8,8,TBD (catalogue),
+L,timing_pulley_GT2,purchased,9,Al,purchased,5.0,3.0,27.0,TBD (catalogue),
+L,tether (per m),purchased,1,-,purchased,,6,6,TBD (catalogue),
+L,compliance spring,purchased,6,-,purchased,,0.5,3.0,TBD (catalogue),
+L,hall sensor + magnet,purchased,6,-,purchased,,1.5,9.0,TBD (catalogue),
+L,LED white 1 W,purchased,4,-,purchased,,1.5,6.0,TBD (catalogue),
+L,LED IR 850 nm,purchased,2,-,purchased,,2,4,TBD (catalogue),
+L,VL53L1X ToF,purchased,2,-,purchased,,9,18,TBD (catalogue),
+L,BNO085 IMU,purchased,1,-,purchased,,20,20,TBD (catalogue),
+L,SHT31 / BMP390 / INA219 breakouts,purchased,1,-,purchased,,15.0,15.0,TBD (catalogue),
+L,E-clip,fastener,28,A2 stainless,purchased,,0.08,2.24,TBD,
+L,M2 heat-set insert,fastener,4,A2 stainless,purchased,,0.08,0.32,TBD,
+L,M2.5 heat-set insert,fastener,8,A2 stainless,purchased,,0.08,0.64,TBD,
+L,M2.5x5 SHCS,fastener,8,A2 stainless,purchased,,0.08,0.64,TBD,
+L,M2x4 SHCS,fastener,4,A2 stainless,purchased,,0.08,0.32,TBD,
+L,M2x5 SHCS,fastener,4,A2 stainless,purchased,,0.08,0.32,TBD,
+L,M2x6 SHCS,fastener,4,A2 stainless,purchased,,0.08,0.32,TBD,
+L,M2x8 SHCS (eccentric),fastener,3,A2 stainless,purchased,,0.08,0.24,TBD,
+L,M3 set screw,fastener,2,A2 stainless,purchased,,0.08,0.16,TBD,
+L,M3x8 SHCS,fastener,12,A2 stainless,purchased,,0.08,0.96,TBD,
+L,M4x10 SHCS,fastener,8,A2 stainless,purchased,,0.08,0.64,TBD,
+L,M4x10 SHCS (spine),fastener,4,A2 stainless,purchased,,0.08,0.32,TBD,
+L,M4x6 SHCS,fastener,6,A2 stainless,purchased,,0.08,0.48,TBD,
+L,M4x6 SHCS (pod),fastener,12,A2 stainless,purchased,,0.08,0.96,TBD,
+L,M4x8 SHCS,fastener,8,A2 stainless,purchased,,0.08,0.64,TBD,
+L,M4x8 SHCS (radial),fastener,24,A2 stainless,purchased,,0.08,1.92,TBD,
+L,centring torsion spring,fastener,2,A2 stainless,purchased,,0.08,0.16,TBD,
+L,hose clamp,fastener,2,A2 stainless,purchased,,0.08,0.16,TBD,
+L,oil-impregnated bronze bushing (pivot),fastener,6,A2 stainless,purchased,,0.08,0.48,TBD,
+L,split collet clamp (Kevlar strength member),fastener,1,A2 stainless,purchased,,0.08,0.08,TBD,

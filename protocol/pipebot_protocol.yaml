@@ -1,0 +1,203 @@
+# PIPEBOT-X wire protocol - single source of truth.
+# tools/gen_protocol.py generates:
+#   firmware/include/protocol_gen.h   (C++17 structs, pack/unpack, CRC)
+#   pi/app/protocol_gen.py            (dataclasses, pack/unpack, CRC, JSON mapping)
+#   app/src/types/protocol.ts         (TypeScript types for the WebSocket/REST JSON)
+#   protocol/pipebot.schema.json      (JSON schema of the JSON messages)
+#
+# Serial framing (MCU <-> Pi), little-endian:
+#   [0xAA 0x55][len:u16][type:u8][payload:len bytes][crc16-ccitt:u16]
+#   crc16-ccitt (poly 0x1021, init 0xFFFF) over len, type and payload.
+# Every Pi->MCU command carries `seq`; the MCU answers with ACK(seq, status).
+# Every motion command carries `ttl_ms`; the MCU stops acting on it when it goes stale.
+
+version: 3
+sync: [0xAA, 0x55]
+max_payload: 160
+
+enums:
+  State:
+    IDLE: 0
+    EXPANDING: 1
+    GRIPPED: 2
+    CRAWLING: 3
+    HOLDING: 4
+    RETRACTING: 5
+    FAULT: 6
+    LOW_POWER_SAFE: 7
+  ExpandMode:
+    DIAMETER: 0
+    FORCE: 1
+    RETRACT: 2
+  AckStatus:
+    OK: 0
+    REJECTED: 1
+    STALE: 2
+    ESTOPPED: 3
+    FAULTED: 4
+    BAD_ARG: 5
+  SupplyMode:
+    TETHER: 0
+    BATTERY: 1
+  Fault:                     # bit index in the faults bitmask
+    SLIP_WARNING: 0          # commanded vs measured wheel speed mismatch >200 ms at current limit
+    GROUND_SLIP: 1           # arms disagree / ToF disagrees with wheel odometry
+    OVERCURRENT: 2
+    OVERTEMP: 3
+    THERMAL_DERATE: 4
+    LOW_BATTERY: 5
+    CRITICAL_BATTERY: 6
+    SUPPLY_UNDERVOLT: 7
+    HEARTBEAT_LOST: 8
+    ESTOP: 9
+    EXPANSION_STALL: 10
+    GRIP_LOW: 11
+    NO_CONTACT: 12
+    IMU_FAIL: 13
+    TOF_FAIL: 14
+    ENCODER_FAIL: 15
+    WATCHDOG_RESET: 16
+    COMMAND_STALE: 17
+  Event:
+    STATE_CHANGE: 1
+    FAULT_SET: 2
+    FAULT_CLEARED: 3
+    CONTACT: 4
+    REGRIP: 5
+    BOOT: 6
+  Param:                     # SET_PARAM ids (settings screen)
+    DRIVE_KP: 1
+    DRIVE_KI: 2
+    DRIVE_KD: 3
+    EXPAND_KP: 4
+    EXPAND_KI: 5
+    DRIVE_CURRENT_A: 6
+    EXPAND_CURRENT_A: 7
+    DRIVE_TTL_MS: 8
+    EXPAND_TTL_MS: 9
+    WHEEL_DIA_MM: 10
+    GRIP_TARGET_N: 11
+    ODOM_RESET: 12
+
+messages:
+  # ------------------------------------------------------------- Pi -> MCU
+  DRIVE:
+    id: 0x10
+    dir: to_mcu
+    fields:
+      - {name: seq, type: u16}
+      - {name: linear_mm_s, type: i16}
+      - {name: turn_deg_s, type: i16}        # bend assist: per-arm differential speed
+      - {name: bend_dir_deg, type: i16}      # direction of the bend centre in the robot frame
+      - {name: ttl_ms, type: u16}
+  EXPAND:
+    id: 0x11
+    dir: to_mcu
+    fields:
+      - {name: seq, type: u16}
+      - {name: mode, type: u8, enum: ExpandMode}
+      - {name: target, type: f32}            # mm (DIAMETER) or N per arm (FORCE)
+      - {name: ttl_ms, type: u16}
+  GIMBAL:
+    id: 0x12
+    dir: to_mcu
+    fields:
+      - {name: seq, type: u16}
+      - {name: pan_deg, type: f32}
+      - {name: tilt_deg, type: f32}
+  LIGHT:
+    id: 0x13
+    dir: to_mcu
+    fields:
+      - {name: seq, type: u16}
+      - {name: white_pct, type: u8}
+      - {name: ir_pct, type: u8}
+  ESTOP:
+    id: 0x14
+    dir: to_mcu
+    fields:
+      - {name: seq, type: u16}
+  CLEAR_FAULT:
+    id: 0x15
+    dir: to_mcu
+    fields:
+      - {name: seq, type: u16}
+  PING:
+    id: 0x16
+    dir: to_mcu
+    fields:
+      - {name: seq, type: u16}
+      - {name: t_ms, type: u32}
+  SET_PARAM:
+    id: 0x17
+    dir: to_mcu
+    fields:
+      - {name: seq, type: u16}
+      - {name: param, type: u16, enum: Param}
+      - {name: value, type: f32}
+  # ------------------------------------------------------------- MCU -> Pi
+  TELEMETRY:
+    id: 0x80
+    dir: from_mcu
+    fields:
+      - {name: t_ms, type: u32}
+      - {name: state, type: u8, enum: State}
+      - {name: faults, type: u32}
+      - {name: est_diameter_mm, type: f32}
+      - {name: lever_angle_deg, type: f32}
+      - {name: grip_force_n, type: f32, count: 3}
+      - {name: axis_offset_mm, type: f32}
+      - {name: linear_mm_s, type: f32}
+      - {name: distance_m, type: f32}
+      - {name: odom_confidence, type: f32}
+      - {name: pitch, type: f32, json: imu.pitch}
+      - {name: roll, type: f32, json: imu.roll}
+      - {name: yaw, type: f32, json: imu.yaw}
+      - {name: pipe_orientation_deg, type: f32}
+      - {name: motor_current_a, type: f32, count: 4}
+      - {name: driver_temp_c, type: f32}
+      - {name: battery_v, type: f32, json: battery.v}
+      - {name: battery_pct, type: u8, json: battery.pct}
+      - {name: battery_current_a, type: f32, json: battery.current_a}
+      - {name: supply_mode, type: u8, enum: SupplyMode, json: battery.supply}
+      - {name: temp_c, type: f32, json: env.temp_c}
+      - {name: humidity_pct, type: f32, json: env.humidity_pct}
+      - {name: pressure_kpa, type: f32, json: env.pressure_kpa}
+      - {name: gas_ppm, type: f32, json: env.gas_ppm}
+      - {name: tof_front_mm, type: u16}
+      - {name: tof_rear_mm, type: u16}
+      - {name: pan_deg, type: f32, json: gimbal.pan_deg}
+      - {name: tilt_deg, type: f32, json: gimbal.tilt_deg}
+      - {name: white_pct, type: u8, json: light.white_pct}
+      - {name: ir_pct, type: u8, json: light.ir_pct}
+      - {name: last_seq, type: u16}
+      - {name: rx_errors, type: u16}
+  ACK:
+    id: 0x81
+    dir: from_mcu
+    fields:
+      - {name: seq, type: u16}
+      - {name: cmd, type: u8}
+      - {name: status, type: u8, enum: AckStatus}
+  PONG:
+    id: 0x82
+    dir: from_mcu
+    fields:
+      - {name: seq, type: u16}
+      - {name: t_ms, type: u32}
+      - {name: mcu_ms, type: u32}
+  EVENT:
+    id: 0x83
+    dir: from_mcu
+    fields:
+      - {name: t_ms, type: u32}
+      - {name: code, type: u8, enum: Event}
+      - {name: state, type: u8, enum: State}
+      - {name: arg, type: u32}
+      - {name: value, type: f32}
+  PARAM_VALUE:
+    id: 0x84
+    dir: from_mcu
+    fields:
+      - {name: param, type: u16, enum: Param}
+      - {name: value, type: f32}

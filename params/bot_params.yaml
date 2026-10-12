@@ -1,23 +1,44 @@
-# PIPEBOT-X single source of truth.
-# Every physical constant used by CAD, calcs, firmware and docs comes from here.
+# PIPEBOT-X single source of truth (revision 3).
+# Every physical constant used by calcs, CAD, firmware, Pi, app and docs comes from here.
 #
-# Revision 2 -- design changes forced by calc/design_calcs.py (see `rejected`):
-#   1. Expansion drive is direct (no 1:20 worm): the worm needs ~8300 rpm at the
-#      motor to meet the 20 s sweep. Self-locking comes from the Tr8x1.5 screw.
-#   2. Lead angle uses the PITCH diameter (7.25 mm -> 3.77 deg), not the nominal
-#      diameter (8 mm -> 3.41 deg). Still self-locking, margin 2.36.
-#   3. Drive wheels go through a self-locking worm (15:1). Stepper detent torque
-#      through a belt holds only ~15% of the load, so power-off hold (T1) fails
-#      with a belt drive.
-#   4. Expansion motor is size-scaled (NEMA11/14/17) instead of NEMA17 everywhere.
-#   5. Radial stroke is derived per size from pipe ID range, not fixed at 95 mm.
-#   6. Grip force is measured primarily from arm-spring deflection (hall sensor).
-#      Stepper current follows the IRUN setpoint, not the load, so it is only a
-#      cross-check / overload trip.
-#   7. Battery and buck ratings are size-scaled (L needs a 5 A / 5 V rail).
-#   8. Elbow fit at R=300 mm: S body 46->44 mm, chassis S 160->150, L 400->380.
-#   9. Final-squeeze torque uses 70% of holding torque (low speed); return springs
-#      reduced (S 3 N, L 10 N) to keep >=1.5 torque margin.
+# Revision 2 (design calcs, step 1):
+#   R2.1 Expansion drive direct, no 1:20 worm (needed 2-8k motor rpm for the 20 s sweep).
+#   R2.2 Lead angle from the pitch diameter: Tr8x1.5 is 3.77 deg, not 3.41 deg.
+#   R2.3 Drive wheels through self-locking worms; belt + stepper detent held only 5-15% of T1.
+#   R2.4 Expansion motor size-scaled.  R2.5 Radial stroke derived from pipe range.
+#   R2.6 Grip force measured by arm-spring deflection (hall), not stepper current.
+#   R2.7 Battery and buck ratings size-scaled.
+# Revision 3 (packaging, steps 2-5):
+#   R3.1 Cone nut + radial rails replaced by worm-sector levers. The radial stroke is ~2x
+#        the body radius on every size, so a radial slide has no guide length, and a
+#        wedge needs 2*stroke/MA of free axial space beside the follower. Three radial
+#        self-locking worms, driven by one central bevel gear, turn a gear sector on each
+#        lever pivot: synchronous, self-centring, holds with power off.
+#   R3.2 Wheels ride on a pivoting rocker (bogie) with a +/-5 mm sprung slide = compliance
+#        + force sensor. Each wheel of a pair carries exactly half the arm force.
+#   R3.2b Rocker pivot sits axle_offset below the axles so the sprung slot + spring cap stay
+#        a weld-bead height below the wall.
+#   R3.3 Size S re-rated 75-160 -> 100-200 mm. Three drive pods + levers + worms cannot fit
+#        a 75 mm bore (arm parts at 120 deg collide inside r~15 mm); body 44 -> 56 mm.
+#        Below 100 mm use a push-rod camera.
+#   R3.4 Size S is tether-powered (no room for a 4S pack and it would break the elbow
+#        length limit). M carries its pack in the hollow spine, L in the rear pod.
+#   R3.4b Drive pods: S uses NEMA8 + 30:1 worm module (NEMA11 pod is too wide for three arms
+#        in a 100 mm bore), S top speed 60 mm/s; one serpentine belt per rocker.
+#   R3.5 Masses re-estimated from the CAD mass report (+12 % wiring/grease allowance):
+#        S 1.8, M 4.2, L 15.0 kg. Grip, worm ratios and speeds re-sized to match
+#        (M 95 mm/s, L 70 mm/s top speed: slip-before-stall at the higher grip).
+#   R3.6 Elbow check uses exact rigid-cylinder-in-torus geometry (step 1 sagitta was
+#        over-conservative). With real motor/gearbox lengths a one-piece body is too long
+#        for a 2D-3D bend on M, so the camera pod rides on a sprung, booted U-joint:
+#        rigid segments are (rear pod + mid zone) and (front pod).
+#   R3.6b Front pods hold dome + gimbal + compute board + controller in line: S 182, M 192, L 235 mm.
+#   R3.8 Wheel bearings are thin-section (MR74/MR106/MR128) so they sit inside the rocker plate
+#        thickness; the outer plate corner stays a weld-bead height off a 100 mm wall.
+#   R3.9 L runs a 24 V motor rail (6S2P pack direct, or 48->24 V buck on tether) (sweep speed) and TMC5160 drivers: a NEMA23 at 2.8 A
+#        exceeds the TMC2209's 2 A RMS.
+#   R3.7 Bend rating is 3 x pipe ID (piggable 3D bend). A fixed 300 mm radius is 3D for S
+#        but 1D for L, which no rigid 600 mm robot can pass.
 
 common:
   gravity_m_s2: 9.81
@@ -28,69 +49,63 @@ common:
   wheel_dry_friction_coeff: 0.75
   wheel_wet_friction_coeff: 0.42
   grip_safety_factor: 2.0
-  min_transient_safety_factor: 1.5   # SF at the worst compliance-spring excursion
-  hold_test_load_multiple: 3.0       # T1: total axial load = this x robot weight (dry)
-  hold_test_min_margin: 1.25         # max-grip dry capacity / T1 load
+  min_transient_safety_factor: 1.5
+  hold_test_load_multiple: 3.0       # T1: total axial load = this x robot weight (dry pipe)
+  hold_test_min_margin: 1.25
   hold_incline_deg: [0, 30, 45, 60, 90]
-  max_speed_mm_s: 120
-  max_pipe_bend_radius_mm: 300
+  bend_radius_over_pipe_id: 3.0      # 3D bends = piggable-line standard; spec's fixed 300 mm is 1D on L (R3.7)
+  elbow_clearance_mm: 2
   sweep_time_s: 20                   # T4 full-range expand time limit
   min_runtime_min: 60
-  arm_compliance_travel_mm: 5        # +/- passive spring travel
-  wheel_alignment_error_deg: 1.0     # wheel skew -> roll torque
-  packaging_clearance_mm: 3
+  arm_compliance_travel_mm: 5        # +/- sprung rocker slide
+  wheel_alignment_error_deg: 1.0
+  pod_wheel_clearance_mm: 3          # wheel inner edge vs pod shell
+  weld_bead_mm: 5                    # T9 obstacle; nothing but tread may be this close to the wall
+  lever_angle_limits_deg: [0, 72]    # worm-sector drive has no toggle point; 72 deg keeps sector teeth on the arc
 
-  cone:
-    half_angle_deg: 40               # cone surface angle from axis
-    friction_coeff: 0.08             # hardened cone / roller follower
-
-  leadscrew:
-    designation: "Tr8x1.5"
-    nominal_dia_mm: 8.0
-    pitch_dia_mm: 7.25
-    minor_dia_mm: 6.5
-    lead_mm: 1.5
-    flank_half_angle_deg: 15
-    friction_coeff: 0.15             # steel on bronze nut
-    thrust_bearing_efficiency: 0.95
-    nut_length_mm: 20
-    end_margin_mm: 30                # bearing block + clearance each end
-    e_modulus_gpa: 200
-    buckling_k: 1.0                  # pinned-pinned
-    min_buckling_sf: 3.0
-    min_self_lock_margin: 1.5        # mu_eff / tan(lead angle)
+  expansion_worm:
+    starts: 1
+    friction_coeff: 0.10             # hardened steel worm on CuSn12 bronze sector
+    min_self_lock_margin: 1.5
+    sector_allow_stress_mpa: 90      # CuSn12 bending, Lewis
+    lewis_form_factor: 0.33
+    planetary_efficiency: 0.90
+    bevel_efficiency: 0.95
 
   drive_worm:
-    ratio: 15
     lead_angle_deg: 3.0
     friction_coeff: 0.10
     min_self_lock_margin: 1.5
-    min_rating_margin: 1.25          # gearbox rated torque / worst-case load
+    min_rating_margin: 1.25
 
   motor_limits:
-    rpm_utilization: 0.85            # max fraction of practical rpm
-    squeeze_torque_fraction: 0.7     # of holding torque, final low-speed squeeze
-    drive_speed_torque_fraction: 0.4
-    drive_motor_efficiency: 0.4      # mechanical/electrical, stepper + driver
+    rpm_utilization: 0.85
+    squeeze_torque_fraction: 0.7     # low-speed fraction of holding torque
+    speed_torque_fraction: 0.4       # at max running speed
+    min_torque_margin: 1.5
+    drive_motor_efficiency: 0.4
     steps_per_rev: 200
     microsteps: 16
 
   arm_structure:
     material: "6061-T6"
     e_modulus_gpa: 68.9
+    yield_mpa: 240
+    min_yield_sf: 2.0
     max_wheel_deflection_mm: 0.5
-    printed_material: "PETG"         # advisory comparison only
+    printed_material: "PETG"
     printed_e_modulus_gpa: 2.1
 
   power:
     camera_w: 1.5
     mcu_sensors_w: 0.9
-    led_white_w_max: 4.0             # 4 x 1 W
+    led_white_w_max: 4.0
     led_ir_w_max: 2.0
     led_avg_duty: 0.5
     gimbal_avg_w: 0.5
     gimbal_peak_w: 3.0
-    battery_nominal_v: 14.8          # 4S Li-ion
+    cell_nominal_v: 3.7
+    battery_cutoff_v_per_cell: 3.3
     battery_usable_fraction: 0.8
     converter_efficiency: 0.9
     driver_efficiency: 0.9
@@ -98,105 +113,204 @@ common:
     motor_hold_current_fraction: 0.25
     crawl_duty: 0.6
     rail_margin: 1.25
-    rail_motor_v: 12.0
     rail_logic_v: 5.0
+    tether_v: 48.0                     # SELV (<60 V DC); 24 V cannot push M/L peak power down 50 m
+    tether_conductor_ohm_per_m: 0.034  # 2 x 0.5 mm^2 copper, loop resistance per metre of cable
+    tether_min_v_at_robot: 30.0       # robot 48 V -> 12 V buck minimum input
 
-  rejected:                          # original-spec numbers, kept to prove the change
+  rejected:                          # original-spec numbers, kept as evidence
     expansion_worm_ratio: 20
-    leadscrew_nominal_dia_lead_angle_mm: 8.0
+    leadscrew_lead_mm: 1.5
+    leadscrew_pitch_dia_mm: 7.25
+    leadscrew_nominal_dia_mm: 8.0
+    leadscrew_mu: 0.15
     drive_belt_ratio: 3.0
     drive_belt_efficiency: 0.95
-    stepper_current_steps: 32        # TMC2209 IRUN resolution
+    cone_half_angle_deg: 40
+
+  control:
+    drive_loop_hz: 1000
+    expansion_loop_hz: 200
+    telemetry_hz: 20
+    watchdog_timeout_ms: 1000
+    slip_detect_ms: 200
+    slip_velocity_error_frac: 0.3
+    drive_ttl_ms: 200
+    expand_ttl_ms: 500
+    critical_v_per_cell: 3.3
+    drive_over_current_frac: 0.9      # x motor-buck rating (INA219 on the drive rail)
+    expand_over_current_frac: 0.5     # x motor-buck rating (INA219 on the expansion motor)
+    thermal_derate_c: 70
+    thermal_trip_c: 85
 
   tether_length_m: [10, 20, 50]
   tether_od_mm: 6.5
+  tether_break_load_factor: 5        # x robot weight
   ip_rating: "IP68"
   operating_temp_c: [-10, 60]
   camera: "IMX708 wide, 120 deg FOV, 1080p30"
   gimbal_pan_range_deg: [-180, 180]
   gimbal_tilt_range_deg: [-90, 90]
 
+stepper_drivers:                    # max RMS phase current (A), max supply (V)
+  TMC2209: {max_rms_a: 2.0, max_v: 29}
+  TMC5160: {max_rms_a: 4.0, max_v: 60}
+
 motors:
-  NEMA11: {holding_torque_nm: 0.12, rated_current_a: 0.67, winding_ohm: 6.0, detent_torque_nm: 0.007, max_rpm: 1500}
-  NEMA14: {holding_torque_nm: 0.25, rated_current_a: 1.0, winding_ohm: 3.6, detent_torque_nm: 0.012, max_rpm: 1000}
-  NEMA17: {holding_torque_nm: 0.45, rated_current_a: 1.5, winding_ohm: 2.3, detent_torque_nm: 0.022, max_rpm: 600}
+  NEMA8: {frame_mm: 20.3, length_mm: 42, mass_kg: 0.08, holding_torque_nm: 0.04, rated_current_a: 0.6, winding_ohm: 8.0, detent_torque_nm: 0.002, max_rpm: 1600, max_rpm_24v: 2480, shaft_mm: 4}
+  NEMA11: {frame_mm: 28.2, length_mm: 32, mass_kg: 0.11, holding_torque_nm: 0.12, rated_current_a: 0.67, winding_ohm: 6.0, detent_torque_nm: 0.007, max_rpm: 1500, max_rpm_24v: 2325, shaft_mm: 5}
+  NEMA14: {frame_mm: 35.2, length_mm: 28, mass_kg: 0.14, holding_torque_nm: 0.25, rated_current_a: 1.0, winding_ohm: 3.6, detent_torque_nm: 0.012, max_rpm: 1000, max_rpm_24v: 1550, shaft_mm: 5}
+  NEMA17: {frame_mm: 42.3, length_mm: 40, mass_kg: 0.28, holding_torque_nm: 0.45, rated_current_a: 1.5, winding_ohm: 2.3, detent_torque_nm: 0.022, max_rpm: 600, max_rpm_24v: 930, shaft_mm: 5}
+  NEMA23: {frame_mm: 56.4, length_mm: 56, mass_kg: 0.70, holding_torque_nm: 1.2, rated_current_a: 2.8, winding_ohm: 0.9, detent_torque_nm: 0.04, max_rpm: 500, max_rpm_24v: 775, shaft_mm: 8}
+  NEMA23L: {frame_mm: 56.4, length_mm: 76, mass_kg: 1.0, holding_torque_nm: 1.9, rated_current_a: 2.8, winding_ohm: 1.13, detent_torque_nm: 0.07, max_rpm: 450, max_rpm_24v: 697, shaft_mm: 8}
 
 sizes:
   S:
-    pipe_id_min_mm: 75
-    pipe_id_max_mm: 160
-    body_dia_mm: 44
-    chassis_length_mm: 150
+    pipe_id_min_mm: 100
+    pipe_id_max_mm: 200
+    body_dia_mm: 56
     wheel_dia_mm: 30
     wheel_width_mm: 12
     wheel_crown_radius_mm: 18
-    wheelbase_mm: 85
-    max_grip_force_per_arm_n: 18
-    mass_target_kg: 0.9
-    drive_motor: NEMA11
-    expansion_motor: NEMA11
-    return_spring_force_n: 3
-    arm_spring_rate_n_mm: 0.6
+    wheelbase_mm: 95
+    max_grip_force_per_arm_n: 36
+    mass_target_kg: 1.8
     cg_offset_mm: 3
-    arm_cantilever_mm: 30
-    arm_section_b_mm: 10
-    arm_section_h_mm: 8
-    drive_worm_rated_torque_nm: 0.5
-    compute_board: "Pi Zero 2 W"
-    compute_avg_w: 2.0
-    compute_peak_w: 3.5
-    battery_capacity_ah: 3.0         # 4S1P 18650
-    buck_12v_a: 4.0
-    buck_5v_a: 3.0
+    max_speed_mm_s: 60
+    lever: {pivot_radius_mm: 21, length_mm: 70, plate_thickness_mm: 3, plate_height_mm: 10}
+    rocker: {axle_offset_mm: 11, pod_drop_mm: 10, spring_rate_n_mm: 1.0, plate_thickness_mm: 2.5, belt_width_mm: 3}
+    expansion: {motor: NEMA14, planetary_ratio: 5, bevel_ratio: 2.25, sector_module_mm: 1.0, sector_teeth: 30, sector_face_mm: 9, worm_pitch_dia_mm: 16}
+    drive: {motor: NEMA8, worm_ratio: 35, worm_rated_torque_nm: 0.6, axle_dia_mm: 4, bearing: "MR74ZZ"}
+    layout: {rear_pod_mm: 92, mid_zone_mm: 136, joint_mm: 20, front_pod_mm: 182, joint_max_angle_deg: 45, spine_dia_mm: 16, spine_wall_mm: 2, wall_mm: 2.5}
+    power: {motor_rail_v: 12, stepper_driver: TMC2209, compute_board: "Pi Zero 2 W", compute_avg_w: 2.0, compute_peak_w: 3.5, battery_series: 0, battery_parallel: 0, cell_ah: 0, buck_motor_a: 6.0, buck_5v_a: 3.0}
   M:
     pipe_id_min_mm: 150
     pipe_id_max_mm: 320
     body_dia_mm: 78
-    chassis_length_mm: 260
     wheel_dia_mm: 45
     wheel_width_mm: 20
     wheel_crown_radius_mm: 28
     wheelbase_mm: 150
-    max_grip_force_per_arm_n: 35
-    mass_target_kg: 1.8
-    drive_motor: NEMA14
-    expansion_motor: NEMA14
-    return_spring_force_n: 8
-    arm_spring_rate_n_mm: 1.2
+    max_grip_force_per_arm_n: 76
+    mass_target_kg: 4.2
     cg_offset_mm: 5
-    arm_cantilever_mm: 55
-    arm_section_b_mm: 14
-    arm_section_h_mm: 10
-    drive_worm_rated_torque_nm: 1.2
-    compute_board: "CM4"
-    compute_avg_w: 4.0
-    compute_peak_w: 7.5
-    battery_capacity_ah: 3.0         # 4S1P 18650
-    buck_12v_a: 5.0
-    buck_5v_a: 3.0
+    max_speed_mm_s: 95
+    lever: {pivot_radius_mm: 33, length_mm: 116, plate_thickness_mm: 4, plate_height_mm: 14}
+    rocker: {axle_offset_mm: 8, pod_drop_mm: 8, spring_rate_n_mm: 1.6, plate_thickness_mm: 3, belt_width_mm: 6}
+    expansion: {motor: NEMA17, planetary_ratio: 5, bevel_ratio: 4, sector_module_mm: 1.5, sector_teeth: 30, sector_face_mm: 15, worm_pitch_dia_mm: 24}
+    drive: {motor: NEMA14, worm_ratio: 20, worm_rated_torque_nm: 2.0, axle_dia_mm: 6, bearing: "MR106ZZ"}
+    layout: {rear_pod_mm: 135, mid_zone_mm: 216, joint_mm: 28, front_pod_mm: 192, joint_max_angle_deg: 45, spine_dia_mm: 48, spine_wall_mm: 1.5, wall_mm: 2.5}
+    power: {motor_rail_v: 12, stepper_driver: TMC2209, compute_board: "CM4", compute_avg_w: 4.0, compute_peak_w: 7.5, battery_series: 4, battery_parallel: 1, cell_ah: 3.5, buck_motor_a: 10.0, buck_5v_a: 3.0}
   L:
     pipe_id_min_mm: 300
     pipe_id_max_mm: 650
     body_dia_mm: 140
-    chassis_length_mm: 380
     wheel_dia_mm: 70
     wheel_width_mm: 30
     wheel_crown_radius_mm: 45
     wheelbase_mm: 230
-    max_grip_force_per_arm_n: 70
-    mass_target_kg: 4.0
-    drive_motor: NEMA17
-    expansion_motor: NEMA17
-    return_spring_force_n: 10
-    arm_spring_rate_n_mm: 1.4
+    max_grip_force_per_arm_n: 250
+    mass_target_kg: 15.0
     cg_offset_mm: 8
-    arm_cantilever_mm: 90
-    arm_section_b_mm: 20
-    arm_section_h_mm: 14
-    drive_worm_rated_torque_nm: 3.0
-    compute_board: "Pi 5"
-    compute_avg_w: 9.0
-    compute_peak_w: 12.0
-    battery_capacity_ah: 6.0         # 4S2P 18650
-    buck_12v_a: 8.0
-    buck_5v_a: 5.0
+    max_speed_mm_s: 70
+    lever: {pivot_radius_mm: 55, length_mm: 250, plate_thickness_mm: 6, plate_height_mm: 34}
+    rocker: {axle_offset_mm: 12, pod_drop_mm: 12, spring_rate_n_mm: 3.0, plate_thickness_mm: 4, belt_width_mm: 9}
+    expansion: {motor: NEMA23L, planetary_ratio: 10, bevel_ratio: 2.75, sector_module_mm: 2.5, sector_teeth: 36, sector_face_mm: 27, worm_pitch_dia_mm: 40}
+    drive: {motor: NEMA23, worm_ratio: 21, worm_rated_torque_nm: 10.0, axle_dia_mm: 8, bearing: "MR128ZZ"}
+    layout: {rear_pod_mm: 250, mid_zone_mm: 260, joint_mm: 45, front_pod_mm: 235, joint_max_angle_deg: 45, spine_dia_mm: 40, spine_wall_mm: 2, wall_mm: 3}
+    power: {motor_rail_v: 24, stepper_driver: TMC5160, compute_board: "Pi 5", compute_avg_w: 9.0, compute_peak_w: 12.0, battery_series: 6, battery_parallel: 2, cell_ah: 3.5, buck_motor_a: 20.0, buck_5v_a: 5.0}
+
+# ---------------------------------------------------------------------------------------
+# CAD-only constants (consumed by cad/). Per-size geometry above stays authoritative.
+cad:
+  min_wall_mm: 2.5                   # FDM rule 5
+  fillet_mm: 1.0
+  moving_clearance_mm: 0.5
+  bulkhead_mm: {S: 4, M: 5, L: 8}
+  lug_thickness_mm: {S: 2.5, M: 3, L: 5}
+  pin_dia_mm: {S: 3, M: 4, L: 6}            # rocker stub pins, axles of small links
+  pivot_shaft_dia_mm: {S: 8, M: 12, L: 20}  # keyed lever shaft: carries full lever torque (tau = 16T/pi d^3)
+  fastener: {S: M2.5, M: M3, L: M4}
+  heat_set_insert:                   # hole dia, depth
+    M2: [3.2, 4.0]
+    M2.5: [3.6, 5.0]
+    M3: [4.0, 5.7]
+    M4: [5.6, 8.1]
+  dome_outer_radius_mm: {S: 21, M: 30, L: 52}
+  dome_wall_mm: {S: 1.5, M: 2.0, L: 3.0}
+  led_ring_thickness_mm: {S: 5, M: 6, L: 8}
+  bumper_height_mm: {S: 6, M: 8, L: 12}
+  drive_gearbox_len_mm: {S: 18, M: 25, L: 40}
+  belt_pulley_pitch_dia_mm: {S: 7.6, M: 12.2, L: 19.1}
+  belt_thickness_mm: {S: 1.4, M: 1.4, L: 1.6}
+  planetary_len_mm: {S: 20, M: 30, L: 50}
+  bevel_module_mm: {S: 0.8, M: 1.0, L: 2.0}
+  bevel_pinion_teeth: {S: 12, M: 10, L: 12}  # crown + pinion must clear the worm: Rc + 1.5m <= r_pivot - worm_len/2
+  worm_length_mm: {S: 10, M: 16, L: 30}
+  cap_min_mm: 6
+  tilt_servo: {S: nano, M: nano, L: micro}
+  pan_drive: {S: n20, M: n20, L: ga25}
+  tread_sleeve_mm: {S: 4, M: 6, L: 10}     # pipe_size_adapter: extra tread radius -> +2x pipe ID
+  print_orientation_bores_vertical: true
+  stroke_samples: 9
+  gimbal_pan_samples_deg: [-180, -90, 0, 90, 180]
+  gimbal_tilt_samples_deg: [-90, -45, 0, 45, 90]
+  interference_tolerance_mm3: 0.5
+  mass_allowance_frac: 0.12          # wiring, grease, potting, fasteners not modelled in CAD
+
+materials:                           # density g/cm^3, process, cost per kg (USD, estimate)
+  6061-T6: {density: 2.70, process: "CNC / waterjet", cost_per_kg: 25}
+  PA12-CF: {density: 1.10, process: "FDM / SLS", cost_per_kg: 80}
+  PETG: {density: 1.27, process: "FDM", cost_per_kg: 25}
+  CuSn12: {density: 8.80, process: "CNC (hobbed)", cost_per_kg: 60}
+  42CrMo4: {density: 7.85, process: "CNC + induction hardened", cost_per_kg: 40}
+  SS316: {density: 8.00, process: "CNC", cost_per_kg: 35}
+  silicone-60A: {density: 1.10, process: "cast in mold", cost_per_kg: 40}
+  TPU-95A: {density: 1.21, process: "FDM", cost_per_kg: 45}
+  PC: {density: 1.20, process: "vacuum-formed / machined", cost_per_kg: 30}
+  EPDM: {density: 1.15, process: "moulded", cost_per_kg: 30}
+  POM: {density: 1.41, process: "CNC", cost_per_kg: 20}
+
+catalog:                             # purchased parts: dims mm, mass kg, unit cost USD (estimates)
+  bearing:
+    684ZZ: {id: 4, od: 9, w: 4, mass: 0.0013, cost: 0.6}
+    MR74ZZ: {id: 4, od: 7, w: 2.5, mass: 0.0004, cost: 0.7}
+    MR106ZZ: {id: 6, od: 10, w: 3, mass: 0.0009, cost: 0.8}
+    MR128ZZ: {id: 8, od: 12, w: 3.5, mass: 0.0013, cost: 0.9}
+    626ZZ: {id: 6, od: 19, w: 6, mass: 0.008, cost: 0.8}
+    608ZZ: {id: 8, od: 22, w: 7, mass: 0.012, cost: 0.8}
+  camera_module: {w: 25, h: 24, d: 11.5, mass: 0.004, cost: 35, name: "Raspberry Pi Camera Module 3 Wide"}
+  servo:
+    micro: {l: 23, w: 12.2, h: 29, mass: 0.013, cost: 8, name: "MG90S metal-gear micro servo"}
+    standard: {l: 40.7, w: 20.5, h: 39.5, mass: 0.055, cost: 18, name: "DS3218 20 kg servo"}
+    nano: {l: 17, w: 8.5, h: 16.5, mass: 0.0045, cost: 9, name: "nano digital servo (tilt)"}
+  pan_drive:
+    n20: {w: 12, h: 10, l: 24, mass: 0.010, cost: 6, name: "N20 1:298 micro gearmotor + AS5600 on pan ring"}
+    ga25: {w: 25, h: 25, l: 55, mass: 0.090, cost: 12, name: "JGA25-370 gearmotor + AS5600 on pan ring"}
+  board:
+    "Pi Zero 2 W": {l: 65, w: 30, h: 5, mass: 0.011, cost: 15}
+    "CM4": {l: 70, w: 50, h: 12, mass: 0.045, cost: 75}
+    "Pi 5": {l: 85, w: 56, h: 17, mass: 0.046, cost: 80}
+    mcu: {l: 60, w: 28, h: 5, mass: 0.012, cost: 45, name: "RP2040 + 4x TMC2209 + INA219 controller (custom PCB)"}
+    driver: {l: 20, w: 15, h: 10, mass: 0.004, cost: 6, name: "TMC2209 StepStick"}
+    buck: {l: 30, w: 20, h: 10, mass: 0.010, cost: 6, name: "48->12/5 V buck module"}
+  cell_18650: {d: 18.4, l: 65.2, mass: 0.047, cost: 5}
+  slip_ring: {d: 12.5, l: 15, mass: 0.010, cost: 18}
+  led_white_1w: {d: 3.5, mass: 0.0005, cost: 1.5}
+  led_ir_850: {d: 3.5, mass: 0.0005, cost: 2}
+  tof_vl53l1x: {l: 13, w: 18, h: 2, mass: 0.001, cost: 9}
+  imu_bno085: {l: 20, w: 20, h: 2, mass: 0.002, cost: 20}
+  hall_sensor: {mass: 0.0005, cost: 1.5, name: "DRV5055 linear hall + 4x2 N52 magnet"}
+  gt2_belt_cost_per_m: 4
+  planetary_gearhead_cost: {S: 25, M: 30, L: 60}
+  worm_gearbox_cost: {S: 20, M: 25, L: 45}
+  tether_cost_per_m: 6
+  fastener_cost: 0.08
+  motor_cost: {NEMA8: 18, NEMA11: 15, NEMA14: 14, NEMA17: 12, NEMA23: 25, NEMA23L: 32}
+
+tether_reel:
+  core_dia_mm: 80
+  flange_dia_mm: 220
+  width_mm: 120
+  packing_factor: 0.8
+  frame_thickness_mm: 6
