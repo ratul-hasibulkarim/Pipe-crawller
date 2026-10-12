@@ -161,7 +161,7 @@ def stepper(frame: float, length: float, shaft_d: float, shaft_len: float) -> cq
 
 
 def pulley(pitch_d: float, width: float, bore: float) -> cq.Workplane:
-    """Timing pulley along Z centred, with flanges."""
+    """Build a timing pulley along Z, centred, with flanges."""
     core = disc(pitch_d / 2, -width / 2, width / 2)
     fl = disc(pitch_d / 2 + 1.2, -width / 2 - 0.8, -width / 2).union(disc(pitch_d / 2 + 1.2, width / 2, width / 2 + 0.8))
     w = core.union(fl)
@@ -178,9 +178,9 @@ def belt_loop(circles: Sequence[tuple[float, float, float]], thick: float, y0: f
     return xz_prism(hull2d(outer), y0, y1).cut(xz_prism(hull2d(inner), y0 - 1, y1 + 1))
 
 
-def rbox(l: float, w: float, h: float, r: float) -> cq.Workplane:
+def rbox(length: float, w: float, h: float, r: float) -> cq.Workplane:
     """Centred box with rounded vertical edges."""
-    b = cq.Workplane("XY").box(l, w, h)
+    b = cq.Workplane("XY").box(length, w, h)
     return b.edges("|Z").fillet(r) if r > 0 else b
 
 

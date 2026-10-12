@@ -18,8 +18,14 @@ def nose_bumper(sz: Size) -> Part:
     h = sz.cad("bumper_height_mm")
     z1 = sz.z_dome - sz.cad("led_ring_thickness_mm") - 1.0
     w = P.tube(sz.rb + 0.5, sz.rb - 1.5, z1 - h, z1)
-    return Part("nose_bumper", MOD, w, "silicone-60A", color=COLORS["rubber"],
-                note="Sits in a 1.5 mm groove behind the LED ring, 0.5 mm proud: takes wall strikes without shadowing the 45 deg LEDs.")
+    return Part(
+        "nose_bumper",
+        MOD,
+        w,
+        "silicone-60A",
+        color=COLORS["rubber"],
+        note="Sits in a 1.5 mm groove behind the LED ring, 0.5 mm proud: takes wall strikes without shadowing the 45 deg LEDs.",
+    )
 
 
 def joint_dims(sz: Size) -> dict[str, float]:
@@ -60,8 +66,15 @@ def articulation_spider(sz: Size) -> Part:
     w = P.cyl_between(pin / 2, (0, -a - j["ear_t"] - 0.6, j["zc"]), (0, a + j["ear_t"] + 0.6, j["zc"]))
     w = w.union(P.cyl_between(pin / 2, (-a - j["ear_t"] - 0.6, 0, j["zc"]), (a + j["ear_t"] + 0.6, 0, j["zc"])))
     w = w.union(P.box(-pin, pin, -pin, pin, j["zc"] - pin, j["zc"] + pin))
-    return Part("articulation_spider", MOD, w, "SS316", color=COLORS["steel"],
-                fasteners={"centring torsion spring": 2, "E-clip": 4}, note="Joint range +/-45 deg, spring-centred.")
+    return Part(
+        "articulation_spider",
+        MOD,
+        w,
+        "SS316",
+        color=COLORS["steel"],
+        fasteners={"centring torsion spring": 2, "E-clip": 4},
+        note="Joint range +/-45 deg, spring-centred.",
+    )
 
 
 def joint_boot(sz: Size) -> Part:
@@ -80,8 +93,15 @@ def service_hatch_gasket(sz: Size) -> Part:
     cs = {"S": 1.5, "M": 2.0, "L": 2.5}[sz.name]
     r = sz.rb - sz.wall + 0.3
     w = P.torus_ring(r, cs / 2)
-    return Part("service_hatch_gasket", MOD, w, "EPDM", qty=6, color=COLORS["rubber"],
-                note=f"O-ring ID {2 * (r - cs / 2):.1f} x {cs} mm (cap, shell/gearbox, spine, front shell, dome, gland).")
+    return Part(
+        "service_hatch_gasket",
+        MOD,
+        w,
+        "EPDM",
+        qty=6,
+        color=COLORS["rubber"],
+        note=f"O-ring ID {2 * (r - cs / 2):.1f} x {cs} mm (cap, shell/gearbox, spine, front shell, dome, gland).",
+    )
 
 
 def pipe_size_adapter(sz: Size) -> Part:
@@ -90,8 +110,15 @@ def pipe_size_adapter(sz: Size) -> Part:
     w_w = sz.s["wheel_width_mm"]
     w = P.cyl_between(sz.wheel_r + t, (0, -w_w / 2, 0), (0, w_w / 2, 0)).cut(P.cyl_between(sz.wheel_r - 0.5, (0, -w_w, 0), (0, w_w, 0)))
     lip = P.cyl_between(sz.wheel_r + t, (0, -w_w / 2 - 1.2, 0), (0, -w_w / 2, 0)).cut(P.cyl_between(sz.wheel_r - 1.5, (0, -w_w, 0), (0, w_w, 0)))
-    return Part("pipe_size_adapter", MOD, w.union(lip), "silicone-60A", qty=0, color=COLORS["rubber"],
-                note=f"Range kit: extends max pipe ID by {2 * t} mm (to {sz.s['pipe_id_max_mm'] + 2 * t} mm). 6 per kit.")
+    return Part(
+        "pipe_size_adapter",
+        MOD,
+        w.union(lip),
+        "silicone-60A",
+        qty=0,
+        color=COLORS["rubber"],
+        note=f"Range kit: extends max pipe ID by {2 * t} mm (to {sz.s['pipe_id_max_mm'] + 2 * t} mm). 6 per kit.",
+    )
 
 
 def tether_capacity_m(p: dict) -> float:
@@ -128,14 +155,39 @@ def tether_reel(p: dict) -> list[Part]:
         Part("tether_reel_spool", MOD, spool, "PA12-CF", color=COLORS["print"], note=f"Capacity {cap:.0f} m of {p['common']['tether_od_mm']} mm tether."),
         Part("tether_reel_frame", MOD, frame, "6061-T6", color=COLORS["alu"], fasteners={"M4x12 SHCS": 12}),
         Part("tether_reel_axle", MOD, axle, "SS316", color=COLORS["steel"]),
-        Part("tether_reel_motor_NEMA17", "purchased", motor, "steel", purchased=True, mass_kg=0.36, cost=12, color=COLORS["motor"],
-             note="Rewind motor through a spring-loaded slip clutch (limits pull on the tether to < tether rating)."),
-        Part("tether_reel_slip_ring", "purchased", slip, "mixed", purchased=True, mass_kg=0.25, cost=120, color=COLORS["steel"],
-             note="Power + Gigabit Ethernet slip ring (e.g. 2 power + 8 signal, 300 rpm)."),
+        Part(
+            "tether_reel_motor_NEMA17",
+            "purchased",
+            motor,
+            "steel",
+            purchased=True,
+            mass_kg=0.36,
+            cost=12,
+            color=COLORS["motor"],
+            note="Rewind motor through a spring-loaded slip clutch (limits pull on the tether to < tether rating).",
+        ),
+        Part(
+            "tether_reel_slip_ring",
+            "purchased",
+            slip,
+            "mixed",
+            purchased=True,
+            mass_kg=0.25,
+            cost=120,
+            color=COLORS["steel"],
+            note="Power + Gigabit Ethernet slip ring (e.g. 2 power + 8 signal, 300 rpm).",
+        ),
     ]
 
 
 def build(sz: Size) -> list[Part]:
     """All per-robot module E parts."""
-    return [nose_bumper(sz), articulation_yoke(sz, False), articulation_yoke(sz, True), articulation_spider(sz), joint_boot(sz),
-            service_hatch_gasket(sz), pipe_size_adapter(sz)]
+    return [
+        nose_bumper(sz),
+        articulation_yoke(sz, False),
+        articulation_yoke(sz, True),
+        articulation_spider(sz),
+        joint_boot(sz),
+        service_hatch_gasket(sz),
+        pipe_size_adapter(sz),
+    ]

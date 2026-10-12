@@ -61,8 +61,12 @@ def rocker_plate(sz: Size) -> Part:
     hw = sz.wheelbase / 2
     xb = pod_x(sz) - sz.pod_half
     s0, s1 = slot_span(sz)
-    pts = (P.circle_pts(ax(sz), -hw, rb, 32) + P.circle_pts(ax(sz), hw, rb, 32)
-           + [(xb, -sz.pod_len / 2), (xb, sz.pod_len / 2)] + P.circle_pts(s1 + 2.5, 0, 3.5, 16))
+    pts = (
+        P.circle_pts(ax(sz), -hw, rb, 32)
+        + P.circle_pts(ax(sz), hw, rb, 32)
+        + [(xb, -sz.pod_len / 2), (xb, sz.pod_len / 2)]
+        + P.circle_pts(s1 + 2.5, 0, 3.5, 16)
+    )
     w = P.xz_prism(P.hull2d(pts), 0, t)
     for z in (-hw, hw):
         w = w.cut(P.cyl_between(b["od"] / 2, (ax(sz), -1, z), (ax(sz), t + 1, z)))
@@ -73,8 +77,17 @@ def rocker_plate(sz: Size) -> Part:
     if sz.pod_half > 12:
         w = w.cut(P.xz_prism(win, -1, t + 1)).cut(P.xz_prism([(x, -z) for x, z in win], -1, t + 1))
     f = sz.cad("fastener")
-    return Part("rocker_plate", MOD, w, "6061-T6", qty=6, color=COLORS["alu"], bearing_bores=[(0, 1, 0)],
-                fasteners={f"{f}x6 SHCS (pod)": 2}, note="Spec 'arm_carriage': carries both axles + the drive pod.")
+    return Part(
+        "rocker_plate",
+        MOD,
+        w,
+        "6061-T6",
+        qty=6,
+        color=COLORS["alu"],
+        bearing_bores=[(0, 1, 0)],
+        fasteners={f"{f}x6 SHCS (pod)": 2},
+        note="Spec 'arm_carriage': carries both axles + the drive pod.",
+    )
 
 
 def wheel_hub(sz: Size) -> Part:
@@ -94,8 +107,17 @@ def wheel_hub(sz: Size) -> Part:
             a = 2 * math.pi * k / 5
             rr = (r_h + d / 2 + 2) / 2
             w = w.cut(P.cyl_between((r_h - d / 2 - 4) / 2.6, (rr * math.cos(a), -w_w, rr * math.sin(a)), (rr * math.cos(a), w_w, rr * math.sin(a))))
-    return Part("wheel_hub", MOD, w, "PA12-CF", qty=6, color=COLORS["print"], bearing_bores=[],
-                print_rot=((1, 0, 0), 90.0), note="Printed flat (axis vertical); D-bore, no supports.")
+    return Part(
+        "wheel_hub",
+        MOD,
+        w,
+        "PA12-CF",
+        qty=6,
+        color=COLORS["print"],
+        bearing_bores=[],
+        print_rot=((1, 0, 0), 90.0),
+        note="Printed flat (axis vertical); D-bore, no supports.",
+    )
 
 
 def tread_profile(sz: Size, n: int = 24) -> list[tuple[float, float]]:
@@ -115,8 +137,15 @@ def wheel_tread(sz: Size) -> Part:
     """Silicone 60A crowned tread, cast in wheel_crown_mold (axis along Y)."""
     pts = tread_profile(sz)
     w = cq.Workplane("XY").polyline(pts).close().revolve(360, (0, 0, 0), (0, 1, 0))
-    return Part("wheel_tread", MOD, w, "silicone-60A", qty=6, color=COLORS["rubber"],
-                note=f"Crown radius {sz.s['wheel_crown_radius_mm']} mm; mu dry {sz.c['wheel_dry_friction_coeff']}, wet {sz.c['wheel_wet_friction_coeff']}.")
+    return Part(
+        "wheel_tread",
+        MOD,
+        w,
+        "silicone-60A",
+        qty=6,
+        color=COLORS["rubber"],
+        note=f"Crown radius {sz.s['wheel_crown_radius_mm']} mm; mu dry {sz.c['wheel_dry_friction_coeff']}, wet {sz.c['wheel_wet_friction_coeff']}.",
+    )
 
 
 def axle_y(sz: Size) -> tuple[float, float]:
@@ -144,8 +173,7 @@ def drive_motor_mount(sz: Size) -> Part:
     for sx in (-1, 1):
         slot = P.box(-1.0, 1.0, -2.5, 2.5, -1, t + 1).translate((pod_x(sz) + sx * fr * 0.35, fr * 0.35, g0 - t))
         w = w.cut(slot)
-    return Part("drive_motor_mount", MOD, w, "6061-T6", qty=3, color=COLORS["alu"],
-                fasteners={"M2x6 SHCS" if fr < 30 else "M3x8 SHCS": 4})
+    return Part("drive_motor_mount", MOD, w, "6061-T6", qty=3, color=COLORS["alu"], fasteners={"M2x6 SHCS" if fr < 30 else "M3x8 SHCS": 4})
 
 
 def drive_motor(sz: Size) -> Part:
@@ -154,8 +182,17 @@ def drive_motor(sz: Size) -> Part:
     g0, _ = gearbox_z(sz)
     face = g0 - 3.0
     w = P.stepper(mt["frame_mm"], min(mt["length_mm"], face + sz.pod_len / 2), mt["shaft_mm"], 3).translate((pod_x(sz), 0, face))
-    return Part(f"drive_stepper_{sz.s['drive']['motor']}", "purchased", w, "steel/copper", qty=3, purchased=True,
-                mass_kg=mt["mass_kg"], cost=sz.p["catalog"]["motor_cost"][sz.s["drive"]["motor"]], color=COLORS["motor"])
+    return Part(
+        f"drive_stepper_{sz.s['drive']['motor']}",
+        "purchased",
+        w,
+        "steel/copper",
+        qty=3,
+        purchased=True,
+        mass_kg=mt["mass_kg"],
+        cost=sz.p["catalog"]["motor_cost"][sz.s["drive"]["motor"]],
+        color=COLORS["motor"],
+    )
 
 
 def drive_gearbox(sz: Size) -> Part:
@@ -166,9 +203,18 @@ def drive_gearbox(sz: Size) -> Part:
     w = w.edges("|Y").fillet(min(2.0, h * 0.2))
     xo, zo = output_xz(sz)
     w = w.union(P.cyl_between(sz.axle_d / 2, (xo, 0, zo), (xo, sz.belt_y[1], zo)))
-    return Part(f"drive_worm_gearbox_{sz.s['drive']['worm_ratio']}to1", "purchased", w, "Zn/steel", qty=3, purchased=True,
-                mass_kg=0.6 * w.val().Volume() * 1e-3 * 2.7 / 1000, cost=sz.p["catalog"]["worm_gearbox_cost"][sz.name],
-                color=COLORS["motor"], note="Self-locking worm (lead angle 3 deg), rated torque in bot_params.")
+    return Part(
+        f"drive_worm_gearbox_{sz.s['drive']['worm_ratio']}to1",
+        "purchased",
+        w,
+        "Zn/steel",
+        qty=3,
+        purchased=True,
+        mass_kg=0.6 * w.val().Volume() * 1e-3 * 2.7 / 1000,
+        cost=sz.p["catalog"]["worm_gearbox_cost"][sz.name],
+        color=COLORS["motor"],
+        note="Self-locking worm (lead angle 3 deg), rated torque in bot_params.",
+    )
 
 
 def pulleys(sz: Size) -> list[tuple[str, tuple[float, float, float]]]:
@@ -183,8 +229,7 @@ def timing_pulley(sz: Size) -> Part:
     """Purchased GT2 pulley (axis Y, centred)."""
     bw = sz.s["rocker"]["belt_width_mm"]
     w = P.pulley(sz.cad("belt_pulley_pitch_dia_mm"), bw, sz.axle_d).rotate((0, 0, 0), (1, 0, 0), 90)
-    return Part("timing_pulley_GT2", "purchased", w, "Al", qty=9, purchased=True, mass_kg=w.val().Volume() * 2.7e-6 * 0.7,
-                cost=3.0, color=COLORS["alu"])
+    return Part("timing_pulley_GT2", "purchased", w, "Al", qty=9, purchased=True, mass_kg=w.val().Volume() * 2.7e-6 * 0.7, cost=3.0, color=COLORS["alu"])
 
 
 def drive_belt(sz: Size) -> Part:
@@ -192,9 +237,18 @@ def drive_belt(sz: Size) -> Part:
     y0, y1 = sz.belt_y
     w = P.belt_loop([c for _, c in pulleys(sz)], sz.cad("belt_thickness_mm"), y0, y1)
     length = sum(2 * math.pi * c[2] for _, c in pulleys(sz)) / 3 + 2 * sz.wheelbase  # approx
-    return Part("drive_belt_GT2", "purchased", w, "rubber/glass", qty=3, purchased=True,
-                mass_kg=w.val().Volume() * 1.2e-6, cost=sz.p["catalog"]["gt2_belt_cost_per_m"] * length / 1000,
-                color=COLORS["belt"], meta={"approx_length_mm": length})
+    return Part(
+        "drive_belt_GT2",
+        "purchased",
+        w,
+        "rubber/glass",
+        qty=3,
+        purchased=True,
+        mass_kg=w.val().Volume() * 1.2e-6,
+        cost=sz.p["catalog"]["gt2_belt_cost_per_m"] * length / 1000,
+        color=COLORS["belt"],
+        meta={"approx_length_mm": length},
+    )
 
 
 def belt_tensioner(sz: Size) -> Part:
@@ -220,8 +274,15 @@ def compliance_spring_retainer(sz: Size) -> Part:
     _, s1 = slot_span(sz)
     w = P.xz_prism(P.circle_pts(s1 + 2.5, 0, 3.0, 24), 0, t)
     w = w.cut(P.cyl_between(1.1, (s1 + 2.5, -1, 0), (s1 + 2.5, t + 1, 0)))
-    return Part("compliance_spring_retainer", MOD, w, "SS316", qty=6, color=COLORS["steel"],
-                note="Spec 'return_spring_retainer'. Hall sensor (DRV5055) on the cap reads the stub-pin magnet.")
+    return Part(
+        "compliance_spring_retainer",
+        MOD,
+        w,
+        "SS316",
+        qty=6,
+        color=COLORS["steel"],
+        note="Spec 'return_spring_retainer'. Hall sensor (DRV5055) on the cap reads the stub-pin magnet.",
+    )
 
 
 def slide_bushing(sz: Size) -> Part:
@@ -253,14 +314,33 @@ def wheel_crown_mold(sz: Size) -> Part:
     blk = blk.cut(P.cyl_between(2.0, (0, 0, r - 0.1), (0, 0, sz.wheel_r - 0.5)).translate((0, w_w / 4, 0)))  # sprue
     for sx in (-1, 1):
         blk = blk.cut(P.cyl_between(1.6, (sx * (r - 3), -1, r - 3), (sx * (r - 3), w_w / 2 + m + 1, r - 3)))
-    return Part("wheel_crown_mold", MOD, blk, "PETG", qty=0, color=COLORS["print"], print_rot=((1, 0, 0), -90.0),
-                note="Tooling: print 2 halves, mirror one. Sprue + 2 dowel pins.")
+    return Part(
+        "wheel_crown_mold",
+        MOD,
+        blk,
+        "PETG",
+        qty=0,
+        color=COLORS["print"],
+        print_rot=((1, 0, 0), -90.0),
+        note="Tooling: print 2 halves, mirror one. Sprue + 2 dowel pins.",
+    )
 
 
 def build(sz: Size) -> list[Part]:
     """All module C parts for a size."""
     return [
-        rocker_plate(sz), wheel_hub(sz), wheel_tread(sz), wheel_axle(sz), drive_motor_mount(sz), drive_motor(sz),
-        drive_gearbox(sz), timing_pulley(sz), drive_belt(sz), belt_tensioner(sz), compliance_spring_retainer(sz),
-        slide_bushing(sz), stub_pin(sz), wheel_crown_mold(sz),
+        rocker_plate(sz),
+        wheel_hub(sz),
+        wheel_tread(sz),
+        wheel_axle(sz),
+        drive_motor_mount(sz),
+        drive_motor(sz),
+        drive_gearbox(sz),
+        timing_pulley(sz),
+        drive_belt(sz),
+        belt_tensioner(sz),
+        compliance_spring_retainer(sz),
+        slide_bushing(sz),
+        stub_pin(sz),
+        wheel_crown_mold(sz),
     ]

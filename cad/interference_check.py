@@ -28,25 +28,50 @@ from cad.lib import primitives as P  # noqa: E402
 
 # designed contacts, by Part.name prefix pairs
 ALLOWED = [
-    ("worm_sector", "expansion_worm"), ("bevel_crown", "bevel_pinion"), ("bevel_pinion", "expansion_worm"),
-    ("gearbox_bulkhead", "worm_bearing_block"), ("expansion_worm", "worm_bearing_block"),
-    ("expansion_motor", "planetary"), ("wheel_axle", "wheel_hub"), ("wheel_hub", "wheel_tread"),
-    ("drive_belt", "timing_pulley"), ("drive_belt", "belt_tensioner"), ("drive_worm_gearbox", "timing_pulley"),
-    ("drive_stepper", "drive_motor_mount"), ("drive_stepper", "drive_worm_gearbox"), ("wheel_axle", "timing_pulley"),
-    ("gimbal_pan_yoke", "pan_gearmotor"), ("gimbal_pan_yoke", "gimbal_tilt_cradle"), ("gimbal_pan_yoke", "tilt_servo"),
-    ("camera_module", "gimbal_tilt_cradle"), ("pivot_shaft", "lever_plate"), ("pivot_shaft", "worm_sector"),
-    ("pivot_shaft", "gearbox_bulkhead"), ("stub_pin", "lever_plate"), ("stub_pin", "slide_bushing"),
-    ("slide_bushing", "rocker_plate"), ("compliance_spring_retainer", "rocker_plate"), ("bearing", "rocker_plate"),
-    ("bearing", "wheel_axle"), ("wheel_axle", "rocker_plate"), ("cell_18650", "battery_caddy"),
-    ("articulation_spider", "articulation_yoke"), ("planetary", "gearbox_bulkhead"), ("planetary", "body_rear_shell"),
-    ("expansion_motor", "body_rear_shell"), ("electronics_tray", "compute"), ("electronics_tray", "mcu_board"),
-    ("electronics_tray", "tmc2209"), ("electronics_tray", "buck"), ("battery_caddy", "body_mid_chassis"),
+    ("worm_sector", "expansion_worm"),
+    ("bevel_crown", "bevel_pinion"),
+    ("bevel_pinion", "expansion_worm"),
+    ("gearbox_bulkhead", "worm_bearing_block"),
+    ("expansion_worm", "worm_bearing_block"),
+    ("expansion_motor", "planetary"),
+    ("wheel_axle", "wheel_hub"),
+    ("wheel_hub", "wheel_tread"),
+    ("drive_belt", "timing_pulley"),
+    ("drive_belt", "belt_tensioner"),
+    ("drive_worm_gearbox", "timing_pulley"),
+    ("drive_stepper", "drive_motor_mount"),
+    ("drive_stepper", "drive_worm_gearbox"),
+    ("wheel_axle", "timing_pulley"),
+    ("gimbal_pan_yoke", "pan_gearmotor"),
+    ("gimbal_pan_yoke", "gimbal_tilt_cradle"),
+    ("gimbal_pan_yoke", "tilt_servo"),
+    ("camera_module", "gimbal_tilt_cradle"),
+    ("pivot_shaft", "lever_plate"),
+    ("pivot_shaft", "worm_sector"),
+    ("pivot_shaft", "gearbox_bulkhead"),
+    ("stub_pin", "lever_plate"),
+    ("stub_pin", "slide_bushing"),
+    ("slide_bushing", "rocker_plate"),
+    ("compliance_spring_retainer", "rocker_plate"),
+    ("bearing", "rocker_plate"),
+    ("bearing", "wheel_axle"),
+    ("wheel_axle", "rocker_plate"),
+    ("cell_18650", "battery_caddy"),
+    ("articulation_spider", "articulation_yoke"),
+    ("planetary", "gearbox_bulkhead"),
+    ("planetary", "body_rear_shell"),
+    ("expansion_motor", "body_rear_shell"),
+    ("electronics_tray", "compute"),
+    ("electronics_tray", "mcu_board"),
+    ("electronics_tray", "tmc2209"),
+    ("electronics_tray", "buck"),
+    ("battery_caddy", "body_mid_chassis"),
     ("joint_boot", "articulation_yoke"),
 ]
 
 
 def allowed(a: Instance, b: Instance) -> bool:
-    """Is this pair a designed contact?"""
+    """Return True if this pair is a designed contact."""
     na, nb = a.part.name, b.part.name
     for x, y in ALLOWED:
         if (na.startswith(x) and nb.startswith(y)) or (na.startswith(y) and nb.startswith(x)):
@@ -65,8 +90,9 @@ class Placed:
     def bb_hit(self, other: Placed, pad: float = 0.0) -> bool:
         """Bounding boxes overlap."""
         a, b = self.bb, other.bb
-        return not (a.xmax + pad < b.xmin or b.xmax + pad < a.xmin or a.ymax + pad < b.ymin or b.ymax + pad < a.ymin
-                    or a.zmax + pad < b.zmin or b.zmax + pad < a.zmin)
+        return not (
+            a.xmax + pad < b.xmin or b.xmax + pad < a.xmin or a.ymax + pad < b.ymin or b.ymax + pad < a.ymin or a.zmax + pad < b.zmin or b.zmax + pad < a.zmin
+        )
 
 
 def common_volume(a: cq.Shape, b: cq.Shape) -> float:

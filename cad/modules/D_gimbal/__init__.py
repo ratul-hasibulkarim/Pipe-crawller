@@ -80,8 +80,14 @@ def camera_window(sz: Size) -> Part:
     sph = cq.Workplane("XY").sphere(rd).cut(cq.Workplane("XY").sphere(rd - t))
     sph = sph.intersect(P.disc(rd + 1, 0, rd + 1))
     w = sph.union(P.tube(rd + 3, rd - t, -2, 0)).translate((0, 0, sz.z_dome))
-    return Part("camera_window", MOD, w, "PC", color=COLORS["clear"],
-                note="Anti-fog: hydrophilic coating + 0.5 W heater trace on the flange; replaceable, O-ring sealed.")
+    return Part(
+        "camera_window",
+        MOD,
+        w,
+        "PC",
+        color=COLORS["clear"],
+        note="Anti-fog: hydrophilic coating + 0.5 W heater trace on the flange; replaceable, O-ring sealed.",
+    )
 
 
 def led_ring_mount(sz: Size) -> Part:
@@ -96,13 +102,15 @@ def led_ring_mount(sz: Size) -> Part:
         a = 2 * math.pi * k / n_led
         c = (rm * math.cos(a), rm * math.sin(a), z1)
         d = (math.cos(a) * 0.707, math.sin(a) * 0.707, -0.707)
-        pocket = P.cyl_between(min(2.0, (ro - ri) / 2 - 0.3), (c[0] - d[0] * 0.5, c[1] - d[1] * 0.5, c[2] + 0.5),
-                               (c[0] + d[0] * 3, c[1] + d[1] * 3, c[2] + d[2] * 3))
+        pocket = P.cyl_between(
+            min(2.0, (ro - ri) / 2 - 0.3), (c[0] - d[0] * 0.5, c[1] - d[1] * 0.5, c[2] + 0.5), (c[0] + d[0] * 3, c[1] + d[1] * 3, c[2] + d[2] * 3)
+        )
         w = w.cut(pocket)
     a = math.radians(30)
     w = w.cut(P.box(-1.6, 1.6, -2.5, 2.5, z1 - 2, z1 + 1).translate((rm * math.cos(a), rm * math.sin(a), 0)))
-    return Part("led_ring_mount", MOD, w, "PA12-CF", color=COLORS["print"], print_rot=((1, 0, 0), 0.0),
-                fasteners={"M2x6 SHCS": 4}, meta={"leds_white": 4, "leds_ir": 2})
+    return Part(
+        "led_ring_mount", MOD, w, "PA12-CF", color=COLORS["print"], print_rot=((1, 0, 0), 0.0), fasteners={"M2x6 SHCS": 4}, meta={"leds_white": 4, "leds_ir": 2}
+    )
 
 
 def gimbal_pan_yoke(sz: Size) -> Part:
@@ -123,9 +131,17 @@ def gimbal_pan_yoke(sz: Size) -> Part:
         arm = arm.cut(P.cyl_between(1.0, (0, y0 - 1, sz.z_dome), (0, y1 + 1, sz.z_dome)))
         w = w.union(arm)
     w = w.cut(P.disc(sz.p["catalog"]["slip_ring"]["d"] / 2 * 0.5, zh - 4, zh + 1))  # wire pass
-    return Part("gimbal_pan_yoke", MOD, w, "PA12-CF", color=COLORS["print"], print_rot=((1, 0, 0), 0.0),
-                bearing_bores=[(0, 0, 1)], fasteners={"M2x5 SHCS": 4, "M2 heat-set insert": 4},
-                note="Continuous pan: ring gear (m0.5) driven by the static gearmotor; AS5600 magnet on the hub.")
+    return Part(
+        "gimbal_pan_yoke",
+        MOD,
+        w,
+        "PA12-CF",
+        color=COLORS["print"],
+        print_rot=((1, 0, 0), 0.0),
+        bearing_bores=[(0, 0, 1)],
+        fasteners={"M2x5 SHCS": 4, "M2 heat-set insert": 4},
+        note="Continuous pan: ring gear (m0.5) driven by the static gearmotor; AS5600 magnet on the hub.",
+    )
 
 
 def gimbal_tilt_cradle(sz: Size) -> Part:
@@ -134,13 +150,13 @@ def gimbal_tilt_cradle(sz: Size) -> Part:
     t = 1.2
     back = P.box(-c["h"] / 2, c["h"] / 2, -c["w"] / 2 - t, c["w"] / 2 + t, -c["d"] / 2 - t, -c["d"] / 2)
     hx = 4.0  # side cheeks only near the tilt axis: keeps the swept sphere = camera corners
-    sides = (P.box(-hx, hx, c["w"] / 2, c["w"] / 2 + t, -c["d"] / 2 - t, c["d"] / 2 * 0.6)
-             .union(P.box(-hx, hx, -c["w"] / 2 - t, -c["w"] / 2, -c["d"] / 2 - t, c["d"] / 2 * 0.6)))
+    sides = P.box(-hx, hx, c["w"] / 2, c["w"] / 2 + t, -c["d"] / 2 - t, c["d"] / 2 * 0.6).union(
+        P.box(-hx, hx, -c["w"] / 2 - t, -c["w"] / 2, -c["d"] / 2 - t, c["d"] / 2 * 0.6)
+    )
     pins = P.cyl_between(0.95, (0, -c["w"] / 2 - 2.0, 0), (0, c["w"] / 2 + 2.0, 0))
     stop = P.box(-hx - 1.5, -hx, c["w"] / 2, c["w"] / 2 + t, -1.0, 1.0)
     w = back.union(sides).union(pins).union(stop)
-    return Part("gimbal_tilt_cradle", MOD, w, "PA12-CF", color=COLORS["print"], print_rot=((1, 0, 0), 0.0),
-                fasteners={"M2x4 SHCS": 4})
+    return Part("gimbal_tilt_cradle", MOD, w, "PA12-CF", color=COLORS["print"], print_rot=((1, 0, 0), 0.0), fasteners={"M2x4 SHCS": 4})
 
 
 def camera(sz: Size) -> Part:
@@ -156,8 +172,7 @@ def tilt_servo_part(sz: Size) -> Part:
     sv = tilt_servo(sz)
     zh = z_hub(sz)
     w = P.box(-sv["l"] / 2, sv["l"] / 2, -sv["w"] / 2, sv["w"] / 2, zh - 3 - sv["h"], zh - 3)
-    return Part(f"tilt_servo_{sz.cad('tilt_servo')}", "purchased", w, "plastic", purchased=True, mass_kg=sv["mass"],
-                cost=sv["cost"], color=COLORS["motor"])
+    return Part(f"tilt_servo_{sz.cad('tilt_servo')}", "purchased", w, "plastic", purchased=True, mass_kg=sv["mass"], cost=sv["cost"], color=COLORS["motor"])
 
 
 def pan_motor(sz: Size) -> Part:
@@ -167,8 +182,7 @@ def pan_motor(sz: Size) -> Part:
     z0 = z_ring(sz) + 0.5
     w = P.box(x - pd["h"] / 2, x + pd["h"] / 2, -pd["w"] / 2, pd["w"] / 2, z0, z0 + pd["l"])
     w = w.union(P.spur_gear(pan_motor_xy(sz) - carrier_r(sz) - 1.0 - 0.5, 0.5, 3.0, 0).translate((x, 0, z0 - 3.5)))
-    return Part(f"pan_gearmotor_{sz.cad('pan_drive')}", "purchased", w, "steel", purchased=True, mass_kg=pd["mass"],
-                cost=pd["cost"], color=COLORS["motor"])
+    return Part(f"pan_gearmotor_{sz.cad('pan_drive')}", "purchased", w, "steel", purchased=True, mass_kg=pd["mass"], cost=pd["cost"], color=COLORS["motor"])
 
 
 def slip_ring(sz: Size) -> Part:
@@ -181,5 +195,4 @@ def slip_ring(sz: Size) -> Part:
 
 def build(sz: Size) -> list[Part]:
     """All module D parts for a size."""
-    return [camera_window(sz), led_ring_mount(sz), gimbal_pan_yoke(sz), gimbal_tilt_cradle(sz), camera(sz),
-            tilt_servo_part(sz), pan_motor(sz), slip_ring(sz)]
+    return [camera_window(sz), led_ring_mount(sz), gimbal_pan_yoke(sz), gimbal_tilt_cradle(sz), camera(sz), tilt_servo_part(sz), pan_motor(sz), slip_ring(sz)]

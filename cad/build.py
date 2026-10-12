@@ -1,5 +1,6 @@
-"""`make cad` entry point: build every size, export STEP/STL/PNG, run the interference
-check, and regenerate BOM, mass report, fastener table and assembly manual.
+"""`make cad` entry point: build, export, check, document.
+
+Build every size, export STEP/STL/PNG, run the interference check, and regenerate BOM, mass report, fastener table and assembly manual.
 
     python3 cad/build.py [--sizes S M L] [--skip-interference] [--no-stl] [--no-thumbs]
 """
@@ -35,7 +36,7 @@ PROC_MULT = {"CNC": (6.0, 15.0), "FDM": (3.0, 2.0), "cast": (4.0, 3.0), "vacuum"
 
 
 def part_cost(pt: Part, mats: dict) -> float:
-    """Unit cost estimate (USD)."""
+    """Estimate the unit cost (USD)."""
     if pt.cost is not None:
         return pt.cost
     mat = mats[pt.material]
@@ -87,8 +88,15 @@ def views(r: Robot, out: Path) -> None:
         pipe = P.tube(rc + 4, rc, z0, z1).cut(P.box(-rc - 10, rc + 10, -rc - 10, 0, z0 - 1, z1 + 1))
         items = [(pipe.val().moved(to_loc(view)), (0.55, 0.6, 0.65), 0.25)]
         items += [(it.part.shape.moved(to_loc(view @ it.m)), it.part.color, 1.0) for it in r.instances(th) if it.group != "seal"]
-        render(items, out / f"stroke_{tag}.png", f"{sz.name}: gripping {sz.pipe_for(th):.0f} mm pipe (theta {math.degrees(th):.1f} deg)",
-               elev=10, azim=-90, tol=0.8, size=(11, 5))
+        render(
+            items,
+            out / f"stroke_{tag}.png",
+            f"{sz.name}: gripping {sz.pipe_for(th):.0f} mm pipe (theta {math.degrees(th):.1f} deg)",
+            elev=10,
+            azim=-90,
+            tol=0.8,
+            size=(11, 5),
+        )
     front = rot((0, 0, 1), 0)
     items = [(it.part.shape.moved(to_loc(front @ it.m)), it.part.color, 1.0) for it in r.instances(sz.theta_max) if it.group != "seal"]
     render(items, out / "front_view_max.png", f"{sz.name}: nose view at max pipe", elev=90, azim=-90, tol=0.8, size=(6, 6))
@@ -115,70 +123,134 @@ def mass_and_bom(r: Robot) -> tuple[dict, list[dict], dict[str, int]]:
         unit_cost = part_cost(pt, mats)
         mass = pt.unit_mass(mats)
         proc = pt.process or ("purchased" if pt.purchased else mats[pt.material]["process"])
-        rows.append({
-            "size": r.sz.name, "part": pt.name, "module": pt.module, "qty": pt.qty, "material": pt.material, "process": proc,
-            "unit_mass_g": round(mass * 1000, 1), "unit_cost_usd": unit_cost, "line_cost_usd": round(unit_cost * pt.qty, 2),
-            "vendor": "TBD (quote)" if not pt.purchased else "TBD (catalogue)", "notes": pt.note,
-        })
+        rows.append(
+            {
+                "size": r.sz.name,
+                "part": pt.name,
+                "module": pt.module,
+                "qty": pt.qty,
+                "material": pt.material,
+                "process": proc,
+                "unit_mass_g": round(mass * 1000, 1),
+                "unit_cost_usd": unit_cost,
+                "line_cost_usd": round(unit_cost * pt.qty, 2),
+                "vendor": "TBD (quote)" if not pt.purchased else "TBD (catalogue)",
+                "notes": pt.note,
+            }
+        )
         for f, n in pt.fasteners.items():
             fast[f] = fast.get(f, 0) + n * max(pt.qty, 0)
     cat = r.p["catalog"]
-    extra = [("tether (per m)", 1, cat["tether_cost_per_m"]), ("compliance spring", 6, 0.5),
-             ("hall sensor + magnet", 6, cat["hall_sensor"]["cost"]), ("LED white 1 W", 4, cat["led_white_1w"]["cost"]),
-             ("LED IR 850 nm", 2, cat["led_ir_850"]["cost"]), ("VL53L1X ToF", 2, cat["tof_vl53l1x"]["cost"]),
-             ("BNO085 IMU", 1, cat["imu_bno085"]["cost"]), ("SHT31 / BMP390 / INA219 breakouts", 1, 15.0)]
+    extra = [
+        ("tether (per m)", 1, cat["tether_cost_per_m"]),
+        ("compliance spring", 6, 0.5),
+        ("hall sensor + magnet", 6, cat["hall_sensor"]["cost"]),
+        ("LED white 1 W", 4, cat["led_white_1w"]["cost"]),
+        ("LED IR 850 nm", 2, cat["led_ir_850"]["cost"]),
+        ("VL53L1X ToF", 2, cat["tof_vl53l1x"]["cost"]),
+        ("BNO085 IMU", 1, cat["imu_bno085"]["cost"]),
+        ("SHT31 / BMP390 / INA219 breakouts", 1, 15.0),
+    ]
     for name, q, c in extra:
-        rows.append({"size": r.sz.name, "part": name, "module": "purchased", "qty": q, "material": "-", "process": "purchased",
-                     "unit_mass_g": "", "unit_cost_usd": c, "line_cost_usd": round(q * c, 2), "vendor": "TBD (catalogue)", "notes": ""})
+        rows.append(
+            {
+                "size": r.sz.name,
+                "part": name,
+                "module": "purchased",
+                "qty": q,
+                "material": "-",
+                "process": "purchased",
+                "unit_mass_g": "",
+                "unit_cost_usd": c,
+                "line_cost_usd": round(q * c, 2),
+                "vendor": "TBD (catalogue)",
+                "notes": "",
+            }
+        )
     for f, n in sorted(fast.items()):
-        rows.append({"size": r.sz.name, "part": f, "module": "fastener", "qty": n, "material": "A2 stainless", "process": "purchased",
-                     "unit_mass_g": "", "unit_cost_usd": cat["fastener_cost"], "line_cost_usd": round(n * cat["fastener_cost"], 2),
-                     "vendor": "TBD", "notes": ""})
+        rows.append(
+            {
+                "size": r.sz.name,
+                "part": f,
+                "module": "fastener",
+                "qty": n,
+                "material": "A2 stainless",
+                "process": "purchased",
+                "unit_mass_g": "",
+                "unit_cost_usd": cat["fastener_cost"],
+                "line_cost_usd": round(n * cat["fastener_cost"], 2),
+                "vendor": "TBD",
+                "notes": "",
+            }
+        )
     allow = r.p["cad"]["mass_allowance_frac"]
-    mass = {"by_module_kg": {k: round(v, 3) for k, v in sorted(by_mod.items())}, "total_kg": round(total, 3),
-            "allowance_frac": allow, "with_allowance_kg": round(total * (1 + allow), 3),
-            "target_kg": r.sz.s["mass_target_kg"], "cg_mm": [round(float(v), 2) for v in cg],
-            "cg_radial_offset_mm": round(float(math.hypot(cg[0], cg[1])), 2), "cg_offset_param_mm": r.sz.s["cg_offset_mm"]}
+    mass = {
+        "by_module_kg": {k: round(v, 3) for k, v in sorted(by_mod.items())},
+        "total_kg": round(total, 3),
+        "allowance_frac": allow,
+        "with_allowance_kg": round(total * (1 + allow), 3),
+        "target_kg": r.sz.s["mass_target_kg"],
+        "cg_mm": [round(float(v), 2) for v in cg],
+        "cg_radial_offset_mm": round(float(math.hypot(cg[0], cg[1])), 2),
+        "cg_offset_param_mm": r.sz.s["cg_offset_mm"],
+    }
     return mass, rows, fast
 
 
 def write_assembly_manual(results: dict, p: dict) -> None:
     """docs/assembly_manual.md (numbered steps, part names, torque specs)."""
-    lines = ["# PIPEBOT-X assembly manual", "",
-             "Generated by `cad/build.py` from `params/bot_params.yaml`. Part names match the STEP files in",
-             "`cad/exports/<size>/step/` and the BOM (`docs/bom.csv`). Torques are for A2 SHCS into 6061;",
-             "into heat-set inserts use 60 %. Use medium threadlocker on every screw in the arm and gearbox.", "",
-             "| Thread | Torque into Al (N·m) | Into insert (N·m) |", "|---|---|---|"]
+    lines = [
+        "# PIPEBOT-X assembly manual",
+        "",
+        "Generated by `cad/build.py` from `params/bot_params.yaml`. Part names match the STEP files in",
+        "`cad/exports/<size>/step/` and the BOM (`docs/bom.csv`). Torques are for A2 SHCS into 6061;",
+        "into heat-set inserts use 60 %. Use medium threadlocker on every screw in the arm and gearbox.",
+        "",
+        "| Thread | Torque into Al (N·m) | Into insert (N·m) |",
+        "|---|---|---|",
+    ]
     for k, v in TORQUE_NM.items():
         lines.append(f"| {k} | {v:.2f} | {0.6 * v:.2f} |")
     for size, res in results.items():
         s = p["sizes"][size]
         f = p["cad"]["fastener"][size]
-        lines += ["", f"## Size {size} ({s['pipe_id_min_mm']}-{s['pipe_id_max_mm']} mm pipe)", "",
-                  "### A. Gearbox and rear pod (flooded gearbox: pack with marine grease, NLGI 2)",
-                  f"1. Press 2x `worm_bearing_block` into each of the three radial bores of `gearbox_bulkhead`.",
-                  "2. Slide `bevel_pinion` onto each `expansion_worm` shaft (set screw on the flat), insert the shafts from the outside.",
-                  f"3. Fit `bevel_crown` on the `planetary_*` output shaft; bolt planetary to the `expansion_motor_*` face ({f}, {TORQUE_NM[f]:.2f} N·m).",
-                  "4. Insert motor+planetary into `body_rear_shell` from the rear until the motor face seats on the internal ring; screw the shell to the gearbox (O-ring `service_hatch_gasket` greased).",
-                  "5. Check by hand: turning the motor shaft turns all three worms; with the motor unpowered, a worm cannot be back-driven from the sector side (self-lock).",
-                  "6. Route the tether through `tether_strain_relief`, clamp the Kevlar member in the collet (pull test 200 N for 60 s), fit the cap with its O-ring.",
-                  "", "### B. Arms (repeat x3)",
-                  "7. Slide the `pivot_shaft` through lug, `lever_plate`, `worm_sector`, `lever_plate`, lug; E-clips both ends. Mesh the sector at the retracted end tooth (expansion at min).",
-                  "8. Assemble the rocker: press thin-section bearings into both `rocker_plate`s, fit `wheel_axle`s through bearings, `wheel_hub`+`wheel_tread`s and the GT2 `timing_pulley`s on the belt side.",
-                  "9. Bolt `drive_stepper_*` + `drive_motor_mount` + `drive_worm_gearbox_*` between the rocker plates; fit `drive_belt_GT2`, tension with `belt_tensioner` (deflection 1 mm at 5 N on the long span).",
-                  "10. Insert `slide_bushing`s + `stub_pin`s, drop the grip spring in each slot, close with `compliance_spring_retainer` (hall sensor faces the magnet in the pin).",
-                  "11. Pin the rocker to the lever tip. Check: rocker pitches freely +/-10 deg and slides +/-5 mm against the spring.",
-                  "", "### C. Spine, joint, front pod",
-                  "12. Bolt `body_mid_chassis` (spine) to the gearbox front face; pass all wires through the spine (no wire crosses an arm joint).",
-                  "13. " + ("Slide the 2x2 18650 pack in `battery_caddy` into the spine (M only)." if size == "M" else ("Fit the 4S2P ring pack (`battery_caddy`) around the expansion motor (L only)." if size == "L" else "S is tether-powered: no battery.")),
-                  "14. Fit `articulation_yoke_rear`, `articulation_spider`, `articulation_yoke_front`; slide `joint_boot` over and clamp. Leave a 30 mm service loop of the wiring inside the boot.",
-                  "15. Fit compute board, controller PCB and buck on `electronics_tray`; slide the tray into `body_front_shell`.",
-                  "16. Gimbal: `slip_ring_6w` and `pan_gearmotor_*` to the tray front; `tilt_servo_*` into `gimbal_pan_yoke`; camera into `gimbal_tilt_cradle`; cradle pins into yoke arms. Check +/-90 deg tilt hard stops and continuous pan.",
-                  "17. `led_ring_mount` with 4 white + 2 IR LEDs and the front VL53L1X; `camera_window` dome with O-ring; `nose_bumper` into its groove.",
-                  "", "### D. Final checks",
-                  f"18. Mass {res['mass']['with_allowance_kg']} kg incl. wiring allowance (target {res['mass']['target_kg']} kg); CG radial offset {res['mass']['cg_radial_offset_mm']} mm.",
-                  "19. Run `tests/acceptance` T4 (diameter sweep) dry before the first pipe run; then T1 hold test.",
-                  "20. IP68: 30 min at 1 m (T13) with the gearbox flooded and the dry pods sealed."]
+        lines += [
+            "",
+            f"## Size {size} ({s['pipe_id_min_mm']}-{s['pipe_id_max_mm']} mm pipe)",
+            "",
+            "### A. Gearbox and rear pod (flooded gearbox: pack with marine grease, NLGI 2)",
+            "1. Press 2x `worm_bearing_block` into each of the three radial bores of `gearbox_bulkhead`.",
+            "2. Slide `bevel_pinion` onto each `expansion_worm` shaft (set screw on the flat), insert the shafts from the outside.",
+            f"3. Fit `bevel_crown` on the `planetary_*` output shaft; bolt planetary to the `expansion_motor_*` face ({f}, {TORQUE_NM[f]:.2f} N·m).",
+            "4. Insert motor+planetary into `body_rear_shell` from the rear until the motor face seats on the internal ring; screw the shell to the gearbox (O-ring `service_hatch_gasket` greased).",
+            "5. Check by hand: turning the motor shaft turns all three worms; with the motor unpowered, a worm cannot be back-driven from the sector side (self-lock).",
+            "6. Route the tether through `tether_strain_relief`, clamp the Kevlar member in the collet (pull test 200 N for 60 s), fit the cap with its O-ring.",
+            "",
+            "### B. Arms (repeat x3)",
+            "7. Slide the `pivot_shaft` through lug, `lever_plate`, `worm_sector`, `lever_plate`, lug; E-clips both ends. Mesh the sector at the retracted end tooth (expansion at min).",
+            "8. Assemble the rocker: press thin-section bearings into both `rocker_plate`s, fit `wheel_axle`s through bearings, `wheel_hub`+`wheel_tread`s and the GT2 `timing_pulley`s on the belt side.",
+            "9. Bolt `drive_stepper_*` + `drive_motor_mount` + `drive_worm_gearbox_*` between the rocker plates; fit `drive_belt_GT2`, tension with `belt_tensioner` (deflection 1 mm at 5 N on the long span).",
+            "10. Insert `slide_bushing`s + `stub_pin`s, drop the grip spring in each slot, close with `compliance_spring_retainer` (hall sensor faces the magnet in the pin).",
+            "11. Pin the rocker to the lever tip. Check: rocker pitches freely +/-10 deg and slides +/-5 mm against the spring.",
+            "",
+            "### C. Spine, joint, front pod",
+            "12. Bolt `body_mid_chassis` (spine) to the gearbox front face; pass all wires through the spine (no wire crosses an arm joint).",
+            "13. "
+            + (
+                "Slide the 2x2 18650 pack in `battery_caddy` into the spine (M only)."
+                if size == "M"
+                else ("Fit the 4S2P ring pack (`battery_caddy`) around the expansion motor (L only)." if size == "L" else "S is tether-powered: no battery.")
+            ),
+            "14. Fit `articulation_yoke_rear`, `articulation_spider`, `articulation_yoke_front`; slide `joint_boot` over and clamp. Leave a 30 mm service loop of the wiring inside the boot.",
+            "15. Fit compute board, controller PCB and buck on `electronics_tray`; slide the tray into `body_front_shell`.",
+            "16. Gimbal: `slip_ring_6w` and `pan_gearmotor_*` to the tray front; `tilt_servo_*` into `gimbal_pan_yoke`; camera into `gimbal_tilt_cradle`; cradle pins into yoke arms. Check +/-90 deg tilt hard stops and continuous pan.",
+            "17. `led_ring_mount` with 4 white + 2 IR LEDs and the front VL53L1X; `camera_window` dome with O-ring; `nose_bumper` into its groove.",
+            "",
+            "### D. Final checks",
+            f"18. Mass {res['mass']['with_allowance_kg']} kg incl. wiring allowance (target {res['mass']['target_kg']} kg); CG radial offset {res['mass']['cg_radial_offset_mm']} mm.",
+            "19. Run `tests/acceptance` T4 (diameter sweep) dry before the first pipe run; then T1 hold test.",
+            "20. IP68: 30 min at 1 m (T13) with the gearbox flooded and the dry pods sealed.",
+        ]
     (DOCS / "assembly_manual.md").write_text("\n".join(lines) + "\n")
 
 
@@ -244,11 +316,15 @@ def main() -> int:
         lines += [f"## Size {size}", "", "| Module | Mass (kg) |", "|---|---|"]
         lines += [f"| {k} | {v:.3f} |" for k, v in m["by_module_kg"].items()]
         flag = "OVER TARGET" if m["with_allowance_kg"] > m["target_kg"] else "within target"
-        lines += [f"| **CAD total** | **{m['total_kg']:.3f}** |",
-                  f"| + {m['allowance_frac'] * 100:.0f} % wiring/grease/potting/fasteners | {m['with_allowance_kg'] - m['total_kg']:.3f} |",
-                  f"| **Estimated flight mass** | **{m['with_allowance_kg']:.3f}** |", "",
-                  f"Target {m['target_kg']} kg: {flag}. CG at {m['cg_mm']} mm (radial offset {m['cg_radial_offset_mm']} mm; "
-                  f"roll calc assumes {m['cg_offset_param_mm']} mm).", ""]
+        lines += [
+            f"| **CAD total** | **{m['total_kg']:.3f}** |",
+            f"| + {m['allowance_frac'] * 100:.0f} % wiring/grease/potting/fasteners | {m['with_allowance_kg'] - m['total_kg']:.3f} |",
+            f"| **Estimated flight mass** | **{m['with_allowance_kg']:.3f}** |",
+            "",
+            f"Target {m['target_kg']} kg: {flag}. CG at {m['cg_mm']} mm (radial offset {m['cg_radial_offset_mm']} mm; "
+            f"roll calc assumes {m['cg_offset_param_mm']} mm).",
+            "",
+        ]
     (DOCS / "mass_report.md").write_text("\n".join(lines))
     fl = ["# Fastener table", "", "Per robot, generated by `cad/build.py` (rule 6: M2/M2.5/M3/M4 SHCS + heat-set inserts only).", ""]
     for size, res in results.items():

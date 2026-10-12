@@ -88,10 +88,7 @@ def gearbox_bulkhead(sz: Size) -> Part:
         cut = cut.union(P.cyl_between(rp + mb + 0.8, (rc - bp / 2 - 1, 0, sz.z_worm), (rc + bp / 2 + 1, 0, sz.z_worm)))
         cut = cut.union(P.cyl_between(shaft_d / 2 + 2.0, (0, 0, sz.z_worm), (sz.r_pivot + wl / 2 + 4, 0, sz.z_worm)))
         # sector sweep slot (centre layer)
-        pie = [(0.0, 0.0)] + [
-            (rs * math.cos(math.radians(a)), rs * math.sin(math.radians(a)))
-            for a in [a0 - dth + i * (2 * dth + 4) / 40 for i in range(41)]
-        ]
+        pie = [(0.0, 0.0)] + [(rs * math.cos(math.radians(a)), rs * math.sin(math.radians(a))) for a in [a0 - dth + i * (2 * dth + 4) / 40 for i in range(41)]]
         fw = e["sector_face_mm"] / 2 + 0.6
         cut = cut.union(P.xz_prism(pie, -fw, fw).translate((sz.r_pivot, 0, 0)))
         slot_parts.append(cut.rotate((0, 0, 0), (0, 0, 1), ang))
@@ -122,7 +119,10 @@ def gearbox_bulkhead(sz: Size) -> Part:
     w = w.cut(P.tube(sz.rb - sz.wall + 1.2, sz.rb - sz.wall - 1, z0 + 1, z0 + 2.5))
     f = sz.cad("fastener")
     return Part(
-        "gearbox_bulkhead", MOD, w, "6061-T6",
+        "gearbox_bulkhead",
+        MOD,
+        w,
+        "6061-T6",
         fasteners={f"{f}x8 SHCS (radial)": 6, f"{f}x10 SHCS (spine)": 4, "oil-impregnated bronze bushing (pivot)": 6},
         color=COLORS["alu"],
         note="Flooded gearbox (marine grease). Sector slots are open by design; dry pods are separately sealed.",
@@ -142,8 +142,7 @@ def bevel_crown(sz: Size) -> Part:
         rib = P.box(rc - bp / 2, rc + bp / 2, -mb * 0.6, mb * 0.6, zt, zt + mb).rotate((0, 0, 0), (0, 0, 1), 360 * k / n)
         w = w.union(rib)
     w = w.cut(P.disc(sz.motor("expansion")["shaft_mm"] / 2, zt - 4 * mb - 1, zt + 2))
-    return Part("bevel_crown", MOD, w, "42CrMo4", color=COLORS["steel"], fasteners={"M3 set screw": 2},
-                meta={"teeth": n})
+    return Part("bevel_crown", MOD, w, "42CrMo4", color=COLORS["steel"], fasteners={"M3 set screw": 2}, meta={"teeth": n})
 
 
 def bevel_pinion(sz: Size) -> Part:
@@ -168,8 +167,15 @@ def expansion_worm(sz: Size) -> Part:
     w = P.worm(sz.worm_d, e["sector_module_mm"], wl, shaft_d, 0.1)
     w = w.rotate((0, 0, 0), (0, 1, 0), 90).translate((sz.r_pivot, 0, sz.z_worm))
     w = w.union(P.cyl_between(shaft_d / 2, (x_in, 0, sz.z_worm), (x_out, 0, sz.z_worm)))
-    return Part("expansion_worm", MOD, w, "42CrMo4", qty=3, color=COLORS["steel"],
-                note=f"Single-start, lead angle {math.degrees(math.atan(e['sector_module_mm'] / sz.worm_d)):.2f} deg: self-locking.")
+    return Part(
+        "expansion_worm",
+        MOD,
+        w,
+        "42CrMo4",
+        qty=3,
+        color=COLORS["steel"],
+        note=f"Single-start, lead angle {math.degrees(math.atan(e['sector_module_mm'] / sz.worm_d)):.2f} deg: self-locking.",
+    )
 
 
 def worm_bearing_block(sz: Size) -> Part:
@@ -199,8 +205,7 @@ def worm_sector(sz: Size) -> Part:
     hub = P.cyl_between(pivot_boss_r(sz), (0, ln1 + 0.2, 0), (0, lp0 - 0.2, 0))
     w = w.union(hub)
     w = w.cut(d_hole(shaft_r(sz), ln1 - 1, lp0 + 1))
-    return Part("worm_sector", MOD, w, "CuSn12", qty=3, color=COLORS["bronze"],
-                note="Keyed (D-flat) on the pivot shaft; teeth hobbed to match the worm.")
+    return Part("worm_sector", MOD, w, "CuSn12", qty=3, color=COLORS["bronze"], note="Keyed (D-flat) on the pivot shaft; teeth hobbed to match the worm.")
 
 
 def lever_plate(sz: Size) -> Part:
@@ -216,8 +221,7 @@ def lever_plate(sz: Size) -> Part:
     if h > 12:
         slot = P.rounded_slot_outline((0, sz.lever_len * 0.3), (0, sz.lever_len * 0.75), h * 0.18)
         w = w.cut(P.xz_prism(slot, -1, t + 1))
-    return Part("lever_plate", MOD, w, "6061-T6", qty=6, color=COLORS["alu"],
-                note="Waterjet 6061-T6 plate; D-hole keys it to the pivot shaft.")
+    return Part("lever_plate", MOD, w, "6061-T6", qty=6, color=COLORS["alu"], note="Waterjet 6061-T6 plate; D-hole keys it to the pivot shaft.")
 
 
 def pivot_shaft(sz: Size) -> Part:
@@ -233,9 +237,16 @@ def expansion_motor(sz: Size) -> Part:
     """Purchased expansion stepper."""
     mt = sz.motor("expansion")
     w = P.stepper(mt["frame_mm"], mt["length_mm"], mt["shaft_mm"], 8).translate((0, 0, sz.z_motor_face))
-    return Part(f"expansion_motor_{sz.s['expansion']['motor']}", "purchased", w, "steel/copper", purchased=True,
-                mass_kg=mt["mass_kg"], cost=sz.p["catalog"]["motor_cost"][sz.s["expansion"]["motor"]],
-                color=COLORS["motor"])
+    return Part(
+        f"expansion_motor_{sz.s['expansion']['motor']}",
+        "purchased",
+        w,
+        "steel/copper",
+        purchased=True,
+        mass_kg=mt["mass_kg"],
+        cost=sz.p["catalog"]["motor_cost"][sz.s["expansion"]["motor"]],
+        color=COLORS["motor"],
+    )
 
 
 def planetary(sz: Size) -> Part:
@@ -244,14 +255,29 @@ def planetary(sz: Size) -> Part:
     ln = sz.cad("planetary_len_mm")
     w = P.disc(fr * 0.45, sz.z_motor_face, sz.z_gearbox0)
     w = w.union(P.disc(sz.motor("expansion")["shaft_mm"] / 2 + 1, sz.z_gearbox0, sz.z_gearbox0 + 3))
-    return Part(f"planetary_{sz.s['expansion']['planetary_ratio']}to1", "purchased", w, "steel", purchased=True,
-                mass_kg=math.pi * (0.45 * fr) ** 2 * ln * 1e-3 * 7.85 * 0.5 / 1000,  # 50% solid steel
-                cost=sz.p["catalog"]["planetary_gearhead_cost"][sz.name], color=COLORS["motor"])
+    return Part(
+        f"planetary_{sz.s['expansion']['planetary_ratio']}to1",
+        "purchased",
+        w,
+        "steel",
+        purchased=True,
+        mass_kg=math.pi * (0.45 * fr) ** 2 * ln * 1e-3 * 7.85 * 0.5 / 1000,  # 50% solid steel
+        cost=sz.p["catalog"]["planetary_gearhead_cost"][sz.name],
+        color=COLORS["motor"],
+    )
 
 
 def build(sz: Size) -> list[Part]:
     """All module B parts for a size."""
     return [
-        gearbox_bulkhead(sz), bevel_crown(sz), bevel_pinion(sz), expansion_worm(sz), worm_bearing_block(sz),
-        worm_sector(sz), lever_plate(sz), pivot_shaft(sz), expansion_motor(sz), planetary(sz),
+        gearbox_bulkhead(sz),
+        bevel_crown(sz),
+        bevel_pinion(sz),
+        expansion_worm(sz),
+        worm_bearing_block(sz),
+        worm_sector(sz),
+        lever_plate(sz),
+        pivot_shaft(sz),
+        expansion_motor(sz),
+        planetary(sz),
     ]

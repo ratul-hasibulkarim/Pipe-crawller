@@ -35,8 +35,15 @@ def shade(t: np.ndarray, rgb: Sequence[float], alpha: float) -> np.ndarray:
     return np.hstack([c, np.full((len(c), 1), alpha)])
 
 
-def render(items: Sequence[tuple[cq.Shape, Sequence[float], float]], path: Path, title: str = "",
-           elev: float = 22, azim: float = -60, tol: float = 0.4, size: tuple[float, float] = (8, 6)) -> None:
+def render(
+    items: Sequence[tuple[cq.Shape, Sequence[float], float]],
+    path: Path,
+    title: str = "",
+    elev: float = 22,
+    azim: float = -60,
+    tol: float = 0.4,
+    size: tuple[float, float] = (8, 6),
+) -> None:
     """Render (shape, rgb, alpha) items to a PNG."""
     fig = plt.figure(figsize=size, dpi=110)
     ax = fig.add_subplot(111, projection="3d")

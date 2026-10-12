@@ -31,7 +31,10 @@ def body_rear_shell(sz: Size) -> Part:
         w = w.cut(P.tube(sz.rb - sz.wall + 1.2, sz.rb - sz.wall - 1, z, z + 1.5))
     f = sz.cad("fastener")
     return Part(
-        "body_rear_shell", MOD, w, "6061-T6",
+        "body_rear_shell",
+        MOD,
+        w,
+        "6061-T6",
         fasteners={f"{f}x8 SHCS (radial)": 12},
         color=COLORS["shell"],
         note="Machined 6061 tube, hard-anodised. Bore holds the planetary flange ring.",
@@ -54,7 +57,10 @@ def tether_strain_relief(sz: Size) -> Part:
     w = w.cut(P.box(off - 4, off + 4, -3, 3, z0 - 1, z0 + sz.wall + 0.1))
     f = sz.cad("fastener")
     return Part(
-        "tether_strain_relief", MOD, w, "6061-T6",
+        "tether_strain_relief",
+        MOD,
+        w,
+        "6061-T6",
         fasteners={f"{f}x6 SHCS": 6, "split collet clamp (Kevlar strength member)": 1},
         color=COLORS["alu"],
         note="Tether load path: Kevlar member clamps in the collet to the cap, never to the PCB. Pull-test 200 N.",
@@ -87,7 +93,10 @@ def body_mid_chassis(sz: Size) -> Part:
             rr = (sz.rb + sro) / 2
             w = w.cut(P.disc(rh, sz.mid - sz.bh - 1, sz.mid + 1).translate((rr * math.cos(a), rr * math.sin(a), 0)))
     return Part(
-        "body_mid_chassis", MOD, w, "6061-T6",
+        "body_mid_chassis",
+        MOD,
+        w,
+        "6061-T6",
         fasteners={f"{sz.cad('fastener')}x10 SHCS": 8},
         color=COLORS["alu"],
         note="Spine carries all inter-pod wiring (no cable crosses an arm joint).",
@@ -104,7 +113,10 @@ def body_front_shell(sz: Size) -> Part:
     h = sz.cad("bumper_height_mm")
     w = w.cut(P.tube(sz.rb + 1, sz.rb - 1.5, z1 - 1.0 - h, z1 - 1.0))  # bumper groove
     return Part(
-        "body_front_shell", MOD, w, "6061-T6",
+        "body_front_shell",
+        MOD,
+        w,
+        "6061-T6",
         fasteners={f"{sz.cad('fastener')}x8 SHCS (radial)": 6},
         color=COLORS["shell"],
         note="Houses gimbal and compute board; dry compartment (IP68).",
@@ -128,7 +140,10 @@ def electronics_tray(sz: Size) -> Part:
     w = w.union(P.box(plate_x - t, plate_x, -ri * 0.8, ri * 0.8, z0, z1))
     w = w.intersect(P.disc(ri, z0 - 1, z1 + 1))
     return Part(
-        "electronics_tray", MOD, w, "PA12-CF",
+        "electronics_tray",
+        MOD,
+        w,
+        "PA12-CF",
         fasteners={"M2.5x5 SHCS": 8, "M2.5 heat-set insert": 8},
         print_rot=((1, 0, 0), 0.0),
         color=COLORS["print"],
@@ -152,9 +167,16 @@ def battery_caddy(sz: Size) -> Part | None:
         for sx in (-1, 1):
             for sy in (-1, 1):
                 caps = caps.cut(P.disc(d / 2 + 0.2, z0 - 1, z0 + 2 * t + ln + 1).translate((sx * d / 2, sy * d / 2, 0)))
-        return Part("battery_caddy", MOD, caps, "PA12-CF", print_rot=((1, 0, 0), 0.0), color=COLORS["print"],
-                    meta={"cells": [(sx * d / 2, sy * d / 2, z0 + t) for sx in (-1, 1) for sy in (-1, 1)], "len": ln},
-                    note="End caps only; cells wrapped in Kapton + fish paper inside the spine.")
+        return Part(
+            "battery_caddy",
+            MOD,
+            caps,
+            "PA12-CF",
+            print_rot=((1, 0, 0), 0.0),
+            color=COLORS["print"],
+            meta={"cells": [(sx * d / 2, sy * d / 2, z0 + t) for sx in (-1, 1) for sy in (-1, 1)], "len": ln},
+            note="End caps only; cells wrapped in Kapton + fish paper inside the spine.",
+        )
     # L: ring of cells around the motor
     r_ring = sz.motor("expansion")["frame_mm"] / 2 * math.sqrt(2) + d / 2 + 1.5
     z0 = sz.z_motor_back + 2
@@ -166,8 +188,7 @@ def battery_caddy(sz: Size) -> Part | None:
         x, y = r_ring * math.cos(a), r_ring * math.sin(a)
         ring = ring.cut(P.disc(d / 2 + 0.2, z0 - 1, z0 + 2 * t + ln + 1).translate((x, y, 0)))
         cells.append((x, y, z0 + t))
-    return Part("battery_caddy", MOD, ring, "PA12-CF", print_rot=((1, 0, 0), 0.0), color=COLORS["print"],
-                meta={"cells": cells, "len": ln})
+    return Part("battery_caddy", MOD, ring, "PA12-CF", print_rot=((1, 0, 0), 0.0), color=COLORS["print"], meta={"cells": cells, "len": ln})
 
 
 def build(sz: Size) -> list[Part]:

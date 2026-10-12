@@ -1,6 +1,6 @@
 """Exploded-view renderer.
 
-    python3 cad/exploded_view.py --size M [--out cad/exports/M/exploded.png]
+python3 cad/exploded_view.py --size M [--out cad/exports/M/exploded.png]
 """
 
 from __future__ import annotations
@@ -18,8 +18,22 @@ sys.path.insert(0, str(ROOT))
 from cad.assembly import Instance, Robot, rot, to_loc, trans  # noqa: E402
 from cad.render import render  # noqa: E402
 
-FRONT_POD = ("body_front_shell", "electronics_tray", "compute", "mcu_board", "buck", "camera_window", "led_ring_mount",
-             "nose_bumper", "gimbal", "camera_module", "tilt_servo", "pan_gearmotor", "slip_ring", "articulation_yoke_front")
+FRONT_POD = (
+    "body_front_shell",
+    "electronics_tray",
+    "compute",
+    "mcu_board",
+    "buck",
+    "camera_window",
+    "led_ring_mount",
+    "nose_bumper",
+    "gimbal",
+    "camera_module",
+    "tilt_servo",
+    "pan_gearmotor",
+    "slip_ring",
+    "articulation_yoke_front",
+)
 REAR_POD = ("body_rear_shell", "tether_strain_relief", "expansion_motor", "planetary", "battery_caddy", "cell_18650")
 
 

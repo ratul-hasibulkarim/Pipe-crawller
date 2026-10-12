@@ -1,5 +1,6 @@
-"""Full PIPEBOT-X assembly: builds every part and places every instance for a given
-lever angle (theta) and camera pan/tilt. Used by exports, interference check, mass
+"""Full PIPEBOT-X assembly for any lever angle and camera pan/tilt.
+
+Builds every part and places every instance for a given lever angle (theta) and camera pan/tilt. Used by exports, interference check, mass
 report, BOM and renders.
 
     python3 cad/assembly.py --size M [--theta-frac 0.5] [--out cad/exports/M/assembly.step]
@@ -34,11 +35,13 @@ def rot(axis: tuple[float, float, float], deg: float) -> np.ndarray:
     t = math.radians(deg)
     c, s = math.cos(t), math.sin(t)
     x, y, z = a
-    r = np.array([
-        [c + x * x * (1 - c), x * y * (1 - c) - z * s, x * z * (1 - c) + y * s],
-        [y * x * (1 - c) + z * s, c + y * y * (1 - c), y * z * (1 - c) - x * s],
-        [z * x * (1 - c) - y * s, z * y * (1 - c) + x * s, c + z * z * (1 - c)],
-    ])
+    r = np.array(
+        [
+            [c + x * x * (1 - c), x * y * (1 - c) - z * s, x * z * (1 - c) + y * s],
+            [y * x * (1 - c) + z * s, c + y * y * (1 - c), y * z * (1 - c) - x * s],
+            [z * x * (1 - c) - y * s, z * y * (1 - c) + x * s, c + z * z * (1 - c)],
+        ]
+    )
     m = np.eye(4)
     m[:3, :3] = r
     return m
@@ -52,7 +55,7 @@ def trans(x: float = 0, y: float = 0, z: float = 0) -> np.ndarray:
 
 
 def to_loc(m: np.ndarray) -> cq.Location:
-    """numpy 4x4 -> cq.Location."""
+    """Numpy 4x4 -> cq.Location."""
     t = gp_Trsf()
     t.SetValues(*m[0, :4], *m[1, :4], *m[2, :4])
     return cq.Location(t)
@@ -78,23 +81,63 @@ def purchased_extras(sz: Size, tray: Part, caddy: Part | None) -> dict[str, Part
     cat = sz.p["catalog"]
     out: dict[str, Part] = {}
     b = sz.bearing
-    out["bearing"] = Part(f"bearing_{sz.s['drive']['bearing']}", "purchased",
-                          P.bearing(b["id"], b["od"], b["w"]).rotate((0, 0, 0), (1, 0, 0), 90),
-                          "steel", qty=12, purchased=True, mass_kg=b["mass"], cost=b["cost"], color=COLORS["steel"])
+    out["bearing"] = Part(
+        f"bearing_{sz.s['drive']['bearing']}",
+        "purchased",
+        P.bearing(b["id"], b["od"], b["w"]).rotate((0, 0, 0), (1, 0, 0), 90),
+        "steel",
+        qty=12,
+        purchased=True,
+        mass_kg=b["mass"],
+        cost=b["cost"],
+        color=COLORS["steel"],
+    )
     bd = cat["board"][sz.s["power"]["compute_board"]]
-    out["compute"] = Part(f"compute_{sz.s['power']['compute_board'].replace(' ', '_')}", "purchased",
-                          P.box(0, bd["h"], -bd["w"] / 2, bd["w"] / 2, 0, bd["l"]), "PCB", purchased=True,
-                          mass_kg=bd["mass"], cost=bd["cost"], color=COLORS["pcb"])
+    out["compute"] = Part(
+        f"compute_{sz.s['power']['compute_board'].replace(' ', '_')}",
+        "purchased",
+        P.box(0, bd["h"], -bd["w"] / 2, bd["w"] / 2, 0, bd["l"]),
+        "PCB",
+        purchased=True,
+        mass_kg=bd["mass"],
+        cost=bd["cost"],
+        color=COLORS["pcb"],
+    )
     mc = cat["board"]["mcu"]
-    out["mcu"] = Part("mcu_board_RP2040", "purchased", P.box(-mc["h"], 0, -mc["w"] / 2, mc["w"] / 2, 0, mc["l"]), "PCB",
-                      purchased=True, mass_kg=mc["mass"], cost=mc["cost"], color=COLORS["pcb"])
+    out["mcu"] = Part(
+        "mcu_board_RP2040",
+        "purchased",
+        P.box(-mc["h"], 0, -mc["w"] / 2, mc["w"] / 2, 0, mc["l"]),
+        "PCB",
+        purchased=True,
+        mass_kg=mc["mass"],
+        cost=mc["cost"],
+        color=COLORS["pcb"],
+    )
     bk = cat["board"]["buck"]
-    out["buck"] = Part("buck_48v_12v_5v", "purchased", P.box(-bk["h"], 0, -bk["w"] / 2, bk["w"] / 2, 0, bk["l"]), "PCB",
-                       purchased=True, mass_kg=bk["mass"], cost=bk["cost"], color=COLORS["pcb"])
+    out["buck"] = Part(
+        "buck_48v_12v_5v",
+        "purchased",
+        P.box(-bk["h"], 0, -bk["w"] / 2, bk["w"] / 2, 0, bk["l"]),
+        "PCB",
+        purchased=True,
+        mass_kg=bk["mass"],
+        cost=bk["cost"],
+        color=COLORS["pcb"],
+    )
     if caddy is not None:
         c = cat["cell_18650"]
-        out["cell"] = Part("cell_18650", "purchased", P.disc(c["d"] / 2, 0, c["l"]), "Li-ion", qty=len(caddy.meta["cells"]),
-                           purchased=True, mass_kg=c["mass"], cost=c["cost"], color=COLORS["led"])
+        out["cell"] = Part(
+            "cell_18650",
+            "purchased",
+            P.disc(c["d"] / 2, 0, c["l"]),
+            "Li-ion",
+            qty=len(caddy.meta["cells"]),
+            purchased=True,
+            mass_kg=c["mass"],
+            cost=c["cost"],
+            color=COLORS["led"],
+        )
     return out
 
 
@@ -129,9 +172,22 @@ class Robot:
         sz = self.sz
         out: list[Instance] = []
         eye = np.eye(4)
-        static = ["body_rear_shell", "tether_strain_relief", "body_mid_chassis", "body_front_shell", "electronics_tray",
-                  "gearbox_bulkhead", "bevel_crown", "camera_window", "led_ring_mount", "nose_bumper",
-                  "articulation_yoke_rear", "articulation_yoke_front", "articulation_spider", "joint_boot"]
+        static = [
+            "body_rear_shell",
+            "tether_strain_relief",
+            "body_mid_chassis",
+            "body_front_shell",
+            "electronics_tray",
+            "gearbox_bulkhead",
+            "bevel_crown",
+            "camera_window",
+            "led_ring_mount",
+            "nose_bumper",
+            "articulation_yoke_rear",
+            "articulation_yoke_front",
+            "articulation_spider",
+            "joint_boot",
+        ]
         if "battery_caddy" in self.parts:
             static.append("battery_caddy")
         for n in static:
@@ -141,8 +197,14 @@ class Robot:
             out.append(Instance(pt.name, pt, eye, "static"))
         # seals (excluded from interference: compressed in grooves by design)
         g = self.parts["service_hatch_gasket"]
-        zs = [-sz.rear + sz.cap_len + 2.75, sz.z_gearbox0 - 2.25, sz.mid - sz.bh / 2,
-              sz.z_dome - sz.cad("led_ring_thickness_mm") - 2.25, sz.z_dome - 1, sz.z_front0 + sz.bh / 2]
+        zs = [
+            -sz.rear + sz.cap_len + 2.75,
+            sz.z_gearbox0 - 2.25,
+            sz.mid - sz.bh / 2,
+            sz.z_dome - sz.cad("led_ring_thickness_mm") - 2.25,
+            sz.z_dome - 1,
+            sz.z_front0 + sz.bh / 2,
+        ]
         for k, z in enumerate(zs):
             out.append(Instance(f"service_hatch_gasket#{k}", g, trans(z=z), "seal"))
         # electronics in the tray
@@ -170,7 +232,6 @@ class Robot:
         (ln0, _), (lp0, _) = sz.lever_plate_y
         (rn0, _), (rp0, _) = sz.rocker_plate_y
         (lv0, _), _ = sz.lever_plate_y
-        b = sz.bearing
         for i, phi in enumerate(sz.arm_angles()):
             grp = f"arm{i}"
             rz = rot((0, 0, 1), phi)

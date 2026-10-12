@@ -137,8 +137,21 @@ def lut(p: dict, size: str, n: int = 33) -> list[tuple[float, float]]:
     return [(mech.pipe_for_theta(geo, th), th) for th in mech.theta_samples(th0, th1, n)]
 
 
-INT_KEYS = {"BATTERY_PARALLEL", "ARM_COUNT", "ARM_ANGLE_DEG", "MOTOR_USTEPS_PER_REV", "BATTERY_SERIES", "DRIVE_LOOP_HZ", "EXPANSION_LOOP_HZ",
-            "TELEMETRY_HZ", "WATCHDOG_TIMEOUT_MS", "SLIP_DETECT_MS", "DRIVE_TTL_MS", "EXPAND_TTL_MS", "DRIVE_WORM_RATIO"}
+INT_KEYS = {
+    "BATTERY_PARALLEL",
+    "ARM_COUNT",
+    "ARM_ANGLE_DEG",
+    "MOTOR_USTEPS_PER_REV",
+    "BATTERY_SERIES",
+    "DRIVE_LOOP_HZ",
+    "EXPANSION_LOOP_HZ",
+    "TELEMETRY_HZ",
+    "WATCHDOG_TIMEOUT_MS",
+    "SLIP_DETECT_MS",
+    "DRIVE_TTL_MS",
+    "EXPAND_TTL_MS",
+    "DRIVE_WORM_RATIO",
+}
 
 
 def fmt(v: float | int) -> str:
@@ -151,12 +164,21 @@ def fmt(v: float | int) -> str:
 
 def gen_header(p: dict) -> str:
     """bot_params.h text."""
-    o = [f"// {HEADER}", "#pragma once", "#include <cstdint>", "", "// Select the build size with -DPIPEBOT_SIZE_S / _M / _L (default M).",
-         "#if !defined(PIPEBOT_SIZE_S) && !defined(PIPEBOT_SIZE_M) && !defined(PIPEBOT_SIZE_L)", "#define PIPEBOT_SIZE_M", "#endif", "",
-         "namespace params {"]
+    o = [
+        f"// {HEADER}",
+        "#pragma once",
+        "#include <cstdint>",
+        "",
+        "// Select the build size with -DPIPEBOT_SIZE_S / _M / _L (default M).",
+        "#if !defined(PIPEBOT_SIZE_S) && !defined(PIPEBOT_SIZE_M) && !defined(PIPEBOT_SIZE_L)",
+        "#define PIPEBOT_SIZE_M",
+        "#endif",
+        "",
+        "namespace params {",
+    ]
     for size in p["sizes"]:
         o.append(f"namespace size_{size} {{")
-        o.append(f'constexpr char NAME = \'{size}\';')
+        o.append(f"constexpr char NAME = '{size}';")
         for k, v in size_constants(p, size).items():
             if k in INT_KEYS:
                 o.append(f"constexpr int32_t {k} = {int(v)};")
@@ -168,8 +190,17 @@ def gen_header(p: dict) -> str:
         o.append("constexpr float DIAMETER_LUT_THETA[DIAMETER_LUT_N] = {" + ", ".join(f"{t:.6f}f" for _, t in table) + "};")
         o.append(f"}}  // namespace size_{size}")
         o.append("")
-    o += ["#if defined(PIPEBOT_SIZE_S)", "using namespace size_S;", "#elif defined(PIPEBOT_SIZE_L)", "using namespace size_L;", "#else",
-          "using namespace size_M;", "#endif", "}  // namespace params", ""]
+    o += [
+        "#if defined(PIPEBOT_SIZE_S)",
+        "using namespace size_S;",
+        "#elif defined(PIPEBOT_SIZE_L)",
+        "using namespace size_L;",
+        "#else",
+        "using namespace size_M;",
+        "#endif",
+        "}  // namespace params",
+        "",
+    ]
     return "\n".join(o)
 
 
@@ -179,8 +210,7 @@ def main() -> int:
     ap.add_argument("--check", action="store_true")
     a = ap.parse_args()
     p = yaml.safe_load((ROOT / "params" / "bot_params.yaml").read_text())
-    outputs = {OUT_H: gen_header(p),
-               OUT_JSON: json.dumps({s: size_constants(p, s) | {"lut": lut(p, s)} for s in p["sizes"]}, indent=1) + "\n"}
+    outputs = {OUT_H: gen_header(p), OUT_JSON: json.dumps({s: size_constants(p, s) | {"lut": lut(p, s)} for s in p["sizes"]}, indent=1) + "\n"}
     stale = []
     for path, text in outputs.items():
         if a.check:

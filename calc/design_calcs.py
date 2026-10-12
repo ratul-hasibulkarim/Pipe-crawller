@@ -113,9 +113,7 @@ def hold_incline_table(p: Params, size: str) -> list[tuple[float, float, float]]
     c, s = p["common"], p["sizes"][size]
     rows = []
     for angle in c["hold_incline_deg"]:
-        n_tot = required_total_normal_force(
-            s["mass_target_kg"], angle, c["wheel_wet_friction_coeff"], c["grip_safety_factor"], c["gravity_m_s2"]
-        )
+        n_tot = required_total_normal_force(s["mass_target_kg"], angle, c["wheel_wet_friction_coeff"], c["grip_safety_factor"], c["gravity_m_s2"])
         rows.append((float(angle), n_tot, n_tot / c["arm_count"]))
     return rows
 

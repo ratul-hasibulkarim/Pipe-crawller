@@ -1,0 +1,22 @@
+[Unit]
+Description=PIPEBOT-X companion server (video, telemetry, control)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=pipebot
+WorkingDirectory=/opt/pipebot
+Environment=PIPEBOT_SIZE=M
+Environment=PIPEBOT_LINK=serial:///dev/ttyACM0?baud=921600
+Environment=PIPEBOT_CAMERA=libcamera
+Environment=PIPEBOT_RECORDINGS=/var/lib/pipebot/recordings
+Environment=PIPEBOT_TETHER_M=50
+ExecStart=/opt/pipebot/venv/bin/uvicorn pi.app.main:app --host 0.0.0.0 --port 8000
+Restart=always
+RestartSec=2
+# the robot keeps its grip without us; restart fast and let the MCU re-sync
+WatchdogSec=0
+Nice=-5
+
+[Install]
+WantedBy=multi-user.target

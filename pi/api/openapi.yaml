@@ -1,0 +1,745 @@
+openapi: 3.1.0
+info:
+  title: PIPEBOT-X companion API
+  version: 3.0.0
+paths:
+  /api/v1/health:
+    get:
+      summary: Health
+      operationId: health_api_v1_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Health Api V1 Health Get
+  /api/v1/config:
+    get:
+      summary: Config
+      operationId: config_api_v1_config_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Config Api V1 Config Get
+  /api/v1/telemetry:
+    get:
+      summary: Telemetry
+      operationId: telemetry_api_v1_telemetry_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Telemetry Api V1 Telemetry Get
+  /api/v1/events:
+    get:
+      summary: Events
+      operationId: events_api_v1_events_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 100
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+                title: Response Events Api V1 Events Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/preflight:
+    get:
+      summary: Preflight
+      operationId: preflight_api_v1_preflight_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Preflight Api V1 Preflight Get
+  /api/v1/drive:
+    post:
+      summary: Drive
+      operationId: drive_api_v1_drive_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DriveBody'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/stop:
+    post:
+      summary: Stop
+      operationId: stop_api_v1_stop_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /api/v1/expand:
+    get:
+      summary: Expand Job
+      operationId: expand_job_api_v1_expand_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Expand Job Api V1 Expand Get
+    post:
+      summary: Expand
+      operationId: expand_api_v1_expand_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpandBody'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      summary: Expand Cancel
+      operationId: expand_cancel_api_v1_expand_delete
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Expand Cancel Api V1 Expand Delete
+  /api/v1/gimbal:
+    post:
+      summary: Gimbal
+      operationId: gimbal_api_v1_gimbal_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GimbalBody'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/light:
+    post:
+      summary: Light
+      operationId: light_api_v1_light_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LightBody'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/estop:
+    post:
+      summary: Estop
+      operationId: estop_api_v1_estop_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /api/v1/clear_fault:
+    post:
+      summary: Clear Fault
+      operationId: clear_fault_api_v1_clear_fault_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /api/v1/param:
+    post:
+      summary: Param
+      operationId: param_api_v1_param_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParamBody'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /stream.mjpeg:
+    get:
+      summary: Mjpeg
+      operationId: mjpeg_stream_mjpeg_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /api/v1/snapshot.jpg:
+    get:
+      summary: Snapshot Jpg
+      operationId: snapshot_jpg_api_v1_snapshot_jpg_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /api/v1/webrtc/offer:
+    post:
+      summary: Webrtc Offer
+      operationId: webrtc_offer_api_v1_webrtc_offer_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OfferBody'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+                title: Response Webrtc Offer Api V1 Webrtc Offer Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/recording/start:
+    post:
+      summary: Rec Start
+      operationId: rec_start_api_v1_recording_start_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordBody'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Rec Start Api V1 Recording Start Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/recording/stop:
+    post:
+      summary: Rec Stop
+      operationId: rec_stop_api_v1_recording_stop_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Rec Stop Api V1 Recording Stop Post
+  /api/v1/mark:
+    post:
+      summary: Mark
+      operationId: mark_api_v1_mark_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarkBody'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Mark Api V1 Mark Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/snapshot:
+    post:
+      summary: Snapshot
+      operationId: snapshot_api_v1_snapshot_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Snapshot Api V1 Snapshot Post
+  /api/v1/recordings:
+    get:
+      summary: Recordings
+      operationId: recordings_api_v1_recordings_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: true
+                  type: object
+                type: array
+                title: Response Recordings Api V1 Recordings Get
+  /api/v1/recordings/{rid}:
+    get:
+      summary: Recording
+      operationId: recording_api_v1_recordings__rid__get
+      parameters:
+      - name: rid
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Rid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Recording Api V1 Recordings  Rid  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/recordings/{rid}/export.csv:
+    get:
+      summary: Export Csv
+      operationId: export_csv_api_v1_recordings__rid__export_csv_get
+      parameters:
+      - name: rid
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Rid
+      - name: start_s
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Start S
+      - name: end_s
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: End S
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/recordings/{rid}/telemetry.json:
+    get:
+      summary: Rec Telemetry
+      operationId: rec_telemetry_api_v1_recordings__rid__telemetry_json_get
+      parameters:
+      - name: rid
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Rid
+      - name: step
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 5
+          title: Step
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+                title: Response Rec Telemetry Api V1 Recordings  Rid  Telemetry Json
+                  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/recordings/{rid}/video.mp4:
+    get:
+      summary: Rec Video
+      operationId: rec_video_api_v1_recordings__rid__video_mp4_get
+      parameters:
+      - name: rid
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Rid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/recordings/{rid}/snapshots/{name}:
+    get:
+      summary: Rec Snapshot
+      operationId: rec_snapshot_api_v1_recordings__rid__snapshots__name__get
+      parameters:
+      - name: rid
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Rid
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Name
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/recordings/{rid}/clip.mp4:
+    get:
+      summary: Rec Clip
+      description: Re-encode a segment of the run video.
+      operationId: rec_clip_api_v1_recordings__rid__clip_mp4_get
+      parameters:
+      - name: rid
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Rid
+      - name: start_s
+        in: query
+        required: true
+        schema:
+          type: number
+          title: Start S
+      - name: end_s
+        in: query
+        required: true
+        schema:
+          type: number
+          title: End S
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /:
+    get:
+      summary: No App
+      operationId: no_app__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response No App  Get
+components:
+  schemas:
+    DriveBody:
+      properties:
+        linear_mm_s:
+          type: number
+          title: Linear Mm S
+          description: + forward / up the pipe
+        turn_deg_s:
+          type: number
+          title: Turn Deg S
+          default: 0.0
+        bend_dir_deg:
+          type: number
+          title: Bend Dir Deg
+          default: 0.0
+        ttl_ms:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Ttl Ms
+      type: object
+      required:
+      - linear_mm_s
+      title: DriveBody
+      description: POST /drive.
+    ExpandBody:
+      properties:
+        mode:
+          type: string
+          title: Mode
+          description: DIAMETER (mm) | FORCE (N per arm) | RETRACT
+          default: FORCE
+        target:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Target
+      type: object
+      title: ExpandBody
+      description: POST /expand.
+    GimbalBody:
+      properties:
+        pan_deg:
+          type: number
+          title: Pan Deg
+          default: 0.0
+        tilt_deg:
+          type: number
+          title: Tilt Deg
+          default: 0.0
+      type: object
+      title: GimbalBody
+      description: POST /gimbal.
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    LightBody:
+      properties:
+        white_pct:
+          type: integer
+          title: White Pct
+          default: 0
+        ir_pct:
+          type: integer
+          title: Ir Pct
+          default: 0
+      type: object
+      title: LightBody
+      description: POST /light.
+    MarkBody:
+      properties:
+        label:
+          type: string
+          title: Label
+          default: event
+      type: object
+      title: MarkBody
+      description: POST /mark.
+    OfferBody:
+      properties:
+        sdp:
+          type: string
+          title: Sdp
+        type:
+          type: string
+          title: Type
+      type: object
+      required:
+      - sdp
+      - type
+      title: OfferBody
+      description: WebRTC offer.
+    ParamBody:
+      properties:
+        name:
+          type: string
+          title: Name
+        value:
+          type: number
+          title: Value
+      type: object
+      required:
+      - name
+      - value
+      title: ParamBody
+      description: POST /param.
+    RecordBody:
+      properties:
+        operator:
+          type: string
+          title: Operator
+          default: ''
+        pipe_id_range:
+          type: string
+          title: Pipe Id Range
+          default: ''
+        note:
+          type: string
+          title: Note
+          default: ''
+      type: object
+      title: RecordBody
+      description: POST /recording/start.
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError

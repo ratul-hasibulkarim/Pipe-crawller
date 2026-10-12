@@ -124,7 +124,7 @@ def gen_cpp(spec: dict[str, Any]) -> str:
         o.append("    return true;")
         o.append("  }")
         o.append("};")
-        o.append(f"static_assert({cn}::kSize <= kMaxPayload, \"{name} payload too large\");")
+        o.append(f'static_assert({cn}::kSize <= kMaxPayload, "{name} payload too large");')
         o.append("")
     o += [
         "// Wrap a payload into a frame; returns bytes written (0 if out is too small).",
@@ -158,9 +158,21 @@ def gen_cpp(spec: dict[str, Any]) -> str:
 # --------------------------------------------------------------------------------------- Python
 def gen_py(spec: dict[str, Any]) -> str:
     """Python module."""
-    o = [f'"""{HEADER}"""', "", "from __future__ import annotations", "", "import struct", "from dataclasses import dataclass, field",
-         "from enum import IntEnum", "from typing import Any, ClassVar", "", f"SYNC = bytes({spec['sync']})",
-         f"MAX_PAYLOAD = {spec['max_payload']}", f"VERSION = {spec['version']}", ""]
+    o = [
+        f'"""{HEADER}"""',
+        "",
+        "from __future__ import annotations",
+        "",
+        "import struct",
+        "from dataclasses import dataclass, field",
+        "from enum import IntEnum",
+        "from typing import Any, ClassVar",
+        "",
+        f"SYNC = bytes({spec['sync']})",
+        f"MAX_PAYLOAD = {spec['max_payload']}",
+        f"VERSION = {spec['version']}",
+        "",
+    ]
     for ename, vals in spec["enums"].items():
         o.append(f"class {ename}(IntEnum):")
         o.append(f'    """{ename} enum."""')
@@ -375,9 +387,19 @@ def gen_schema(spec: dict[str, Any]) -> str:
                 if path[0] not in req:
                     req.append(path[0])
         defs[camel(name)] = {"type": "object", "properties": props, "required": req}
-    return json.dumps({"$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "pipebot.schema.json",
-                       "title": f"PIPEBOT-X protocol v{spec['version']}", "$defs": defs,
-                       "oneOf": [{"$ref": f"#/$defs/{k}"} for k in defs]}, indent=2) + "\n"
+    return (
+        json.dumps(
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "pipebot.schema.json",
+                "title": f"PIPEBOT-X protocol v{spec['version']}",
+                "$defs": defs,
+                "oneOf": [{"$ref": f"#/$defs/{k}"} for k in defs],
+            },
+            indent=2,
+        )
+        + "\n"
+    )
 
 
 def main() -> int:
