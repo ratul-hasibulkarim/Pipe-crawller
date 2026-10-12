@@ -113,13 +113,13 @@ class Size:
 
     @property
     def theta_min(self) -> float:
-        """Lever angle at min pipe (rad)."""
-        return mech.theta_for_pipe(self.geo, self.s["pipe_id_min_mm"])
+        """Lever angle fully retracted (rad): min pipe less the insertion clearance."""
+        return mech.stroke(self.p, self.name)[0]
 
     @property
     def theta_max(self) -> float:
-        """Lever angle at max pipe (rad)."""
-        return mech.theta_for_pipe(self.geo, self.s["pipe_id_max_mm"])
+        """Lever angle fully extended (rad): max pipe with the rocker slides compressed."""
+        return mech.stroke(self.p, self.name)[1]
 
     def thetas(self) -> list[float]:
         """Stroke samples for interference checking (rad)."""

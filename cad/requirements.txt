@@ -1,0 +1,5 @@
+cadquery>=2.8
+numpy>=1.26
+matplotlib>=3.8
+trimesh>=4.0
+PyYAML>=6.0

@@ -10,10 +10,25 @@ namespace ctl {
 
 namespace {
 constexpr float kAngleTol = 0.2f * kin::kDeg;
+constexpr float kDiameterTolMm = 0.3f;  // DIAMETER mode stops within this (T4: +/-1 mm)
+// Lever angle = stepper dead-reckoning (600:1+ to the lever, so microsteps are microradians)
+// pulled toward the absolute encoder with this weight per tick (tau ~0.25 s at 200 Hz). The
+// AS5600 alone is ~0.09 deg per count: 0.75 mm of diameter on the 250 mm L lever.
+constexpr float kEncBlend = 0.02f;
 constexpr float kTwoPi = 6.28318531f;
 }  // namespace
 
-float ExpansionLoop::diameter() const { return kin::diameterForTheta(theta_); }
+// Lever geometry gives the wheels' reach with the rockers on their outer stops; a gripping
+// wheel sits `slide` mm inside that, plus its tread / frame squash F / k_contact. The mean
+// over the three arms cancels a sideways body offset (arms at 120 deg), so it measures the
+// pipe, not the sag.
+float ExpansionLoop::diameter() const {
+  const float reach = kin::diameterForTheta(theta_);
+  if (contactCount() < 2) return reach;  // not gripping: report the wheels' reach
+  float inset = 0;
+  for (int i = 0; i < 3; ++i) inset += slide_[i] + grip_[i] / params::CONTACT_STIFFNESS_N_MM;
+  return reach - 2.0f * inset / 3.0f;
+}
 
 int ExpansionLoop::contactCount() const {
   int n = 0;
@@ -32,6 +47,11 @@ float ExpansionLoop::effForce(int i) const {
 float ExpansionLoop::gripMin() const { return std::fmin(effForce(0), std::fmin(effForce(1), effForce(2))); }
 
 float ExpansionLoop::gripAvg() const { return (effForce(0) + effForce(1) + effForce(2)) / 3.0f; }
+
+float ExpansionLoop::gripSqueeze() const {
+  const float a = grip_[0], b = grip_[1], c = grip_[2];
+  return std::fmax(std::fmin(a, b), std::fmin(std::fmax(a, b), c));
+}
 
 // Gripped = at least two arms loaded (the third is then held against the wall by geometry).
 bool ExpansionLoop::allContact() const { return contactCount() >= 2; }
@@ -60,7 +80,14 @@ void ExpansionLoop::step(const hal::Hardware& hw, const ExpCmd& cmd, float dt) {
   enc_ok_ = hw.lever_enc->read(a);
   if (enc_ok_) {
     if (a > kTwoPi * 0.5f) a -= kTwoPi;  // lever never passes +/-180 deg
-    theta_ = a;
+    enc_theta_ = a;
+  }
+  if (!theta_init_) {
+    theta_ = enc_theta_;
+    theta_init_ = enc_ok_;
+  } else {
+    theta_ += omega_ * dt;  // the stepper turned exactly as commanded unless it stalled
+    if (enc_ok_) theta_ += kEncBlend * (enc_theta_ - theta_);
   }
   for (int i = 0; i < 3; ++i) {
     float s = 0;
@@ -89,15 +116,17 @@ void ExpansionLoop::step(const hal::Hardware& hw, const ExpCmd& cmd, float dt) {
       case ExpMode::RETRACT: {
         const float tgt = cmd.mode == ExpMode::RETRACT ? params::THETA_MIN_RAD : kin::thetaForDiameter(cmd.target);
         const float err = tgt - theta_;
-        if (std::fabs(err) < kAngleTol) {
+        // d(diameter)/d(theta) = 2 L cos(theta): convert the diameter tolerance to an angle here
+        const float tol = cmd.mode == ExpMode::RETRACT ? kAngleTol : kDiameterTolMm / (2.0f * params::LEVER_LEN_MM * std::cos(theta_));
+        if (std::fabs(err) < tol) {
           done_ = true;
         } else {
           // proportional approach with a speed cap (accel-limited in drive())
           w = clampf(err * 4.0f, -wmax, wmax);
           if (std::fabs(w) < 0.05f * wmax) w = err > 0 ? 0.05f * wmax : -0.05f * wmax;
         }
-        // never crush: stop extending once any arm is at the force limit
-        if (w > 0 && (grip_[0] > params::MAX_GRIP_N || grip_[1] > params::MAX_GRIP_N || grip_[2] > params::MAX_GRIP_N)) {
+        // never crush: stop extending once the squeeze reaches the force limit
+        if (w > 0 && gripSqueeze() > params::GRIP_LIMIT_N) {
           w = 0;
           done_ = true;
         }
@@ -105,12 +134,12 @@ void ExpansionLoop::step(const hal::Hardware& hw, const ExpCmd& cmd, float dt) {
       }
       case ExpMode::FORCE:
       case ExpMode::MAINTAIN: {
-        const float tgt = clampf(cmd.target, params::SPRING_PRELOAD_N + 1.0f, params::MAX_GRIP_N);
-        const float fmax = std::fmax(grip_[0], std::fmax(grip_[1], grip_[2]));
+        const float tgt = clampf(cmd.target, params::SPRING_PRELOAD_N + 1.0f, params::GRIP_LIMIT_N);
+        const float squeeze = gripSqueeze();
         if (cmd.mode == ExpMode::MAINTAIN) {
           // only act when out of band for a while (worms stay locked otherwise)
           const bool low = !allContact() || gripAvg() < tgt - params::REGRIP_DEADBAND_N || gripMin() < params::GRIP_LOW_N;
-          const bool high = fmax > 0.95f * params::MAX_GRIP_N;
+          const bool high = squeeze > params::GRIP_LIMIT_N;
           maintain_s_ = (low || high) ? maintain_s_ + dt : 0.0f;
           if (maintain_s_ > 0.3f) maintain_active_ = true;
           if (!maintain_active_) {
@@ -128,7 +157,7 @@ void ExpansionLoop::step(const hal::Hardware& hw, const ExpCmd& cmd, float dt) {
           }
         } else {
           const float err = tgt - gripAvg();
-          if (fmax > params::MAX_GRIP_N) {
+          if (squeeze > params::GRIP_LIMIT_N) {
             w = -0.1f * wmax;
           } else if (std::fabs(err) < 0.5f * params::REGRIP_DEADBAND_N) {
             done_ = true;
@@ -147,7 +176,7 @@ void ExpansionLoop::step(const hal::Hardware& hw, const ExpCmd& cmd, float dt) {
 
   // --- stall: motor turning but the lever not following (missed steps / jam)
   if (have_prev_ && dt > 0 && std::fabs(omega_) > 0.3f * wmax) {
-    const float rate = (theta_ - prev_theta_) / dt;
+    const float rate = (enc_theta_ - prev_enc_) / dt;  // raw encoder: the fused angle would hide a stall
     const bool lag = std::fabs(rate) < 0.2f * std::fabs(omega_);
     stall_s_ = lag ? stall_s_ + dt : 0.0f;
   } else {
@@ -158,7 +187,7 @@ void ExpansionLoop::step(const hal::Hardware& hw, const ExpCmd& cmd, float dt) {
     omega_ = 0;
     hw.stepper[3]->setVelocity(0);
   }
-  prev_theta_ = theta_;
+  prev_enc_ = enc_theta_;
   have_prev_ = enc_ok_;
 }
 

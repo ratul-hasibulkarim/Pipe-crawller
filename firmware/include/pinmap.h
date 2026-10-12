@@ -30,6 +30,7 @@ constexpr uint8_t kTmcUartTx = 4, kTmcUartRx = 5;
 // PIN | GP8 | PIO0 SM2 | STEP drive C - fallback
 // PIN | GP9 | PIO0 SM3 | STEP expansion - fallback
 constexpr uint8_t kStep[4] = {6, 7, 8, 9};
+// ---- Lights, safety, power status ------------------------------------------------------
 // PIN | GP10 | PWM5 A | IR 850 nm LED driver DIM
 constexpr uint8_t kIrPwm = 10;
 // PIN | GP11 | GPIO in | E-stop loop sense (pull-up; low = loop closed = OK). Same loop drops the driver ENABLE relay.
@@ -38,9 +39,11 @@ constexpr uint8_t kEstopSense = 11;
 constexpr uint8_t kOnBattery = 12;
 // PIN | GP13 | GPIO out | camera/ToF window heater MOSFET (anti-fog)
 constexpr uint8_t kHeater = 13;
+// ---- Driver enables (the hardware E-stop loop is in series) -----------------------------
 // PIN | GP14 | GPIO out | DRIVE_EN, active low, 3 drive drivers (hardware E-stop relay in series)
 // PIN | GP15 | GPIO out | EXPAND_EN, active low, expansion driver
 constexpr uint8_t kDriveEn = 14, kExpandEn = 15;
+// ---- SPI: TMC5160 drivers on size L ----------------------------------------------------
 // PIN | GP16 | SPI0 RX | TMC5160 SDO (size L) / spare
 // PIN | GP17 | SPI0 CSn | TMC5160 chip select via 74HC138 (size L) / spare
 // PIN | GP18 | SPI0 SCK | TMC5160 SCK (size L) / spare
@@ -69,10 +72,12 @@ constexpr uint8_t kTiltServo = 23, kPanIn1 = 24, kPanIn2 = 25;
 // PIN | GP27 | ADC1 | grip hall sensor arm B
 // PIN | GP28 | ADC2 | grip hall sensor arm C
 constexpr uint8_t kHall[3] = {26, 27, 28};
+// ---- White light ----------------------------------------------------------------------
 // PIN | GP29 | PWM6 B | white LED driver DIM (4 x 1 W constant-current buck)
 constexpr uint8_t kWhitePwm = 29;
 
-// Hall calibration (per robot, written at assembly by tools/calibrate_hall.py; defaults here)
+// Hall calibration per robot: measured at assembly (docs/test_plan.md, "Calibration":
+// read the ADC with 0 mm and 10 mm gauge blocks under each rocker slide) and entered here.
 constexpr float kHallZeroV[3] = {0.60f, 0.60f, 0.60f};
 constexpr float kHallVPerMm[3] = {0.21f, 0.21f, 0.21f};
 

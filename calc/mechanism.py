@@ -66,6 +66,21 @@ def theta_for_pipe(g: ArmGeometry, pipe_id_mm: float) -> float:
     return math.asin(s)
 
 
+def stroke(p: Params, size: str) -> tuple[float, float]:
+    """Lever stroke (theta_lo, theta_hi) in rad, both ends with working margin.
+
+    Retracted: the wheels clear the minimum pipe by the insertion clearance (radial), so
+    the robot slides in. Extended: the wheels reach the maximum pipe with the rocker slide
+    fully compressed (2 x compliance travel), so the force servo can reach any grip target
+    there. Without these margins the rated pipe range is only touched, not gripped.
+    """
+    g = arm_geometry(p, size)
+    s, c = p["sizes"][size], p["common"]
+    lo = theta_for_pipe(g, s["pipe_id_min_mm"] - 2 * c["insertion_clearance_mm"])
+    hi = theta_for_pipe(g, s["pipe_id_max_mm"] + 4 * c["arm_compliance_travel_mm"])
+    return lo, hi
+
+
 def pipe_for_theta(g: ArmGeometry, theta: float) -> float:
     """Pipe ID (mm) gripped at lever angle theta."""
     return 2 * contact_radius(g, theta)

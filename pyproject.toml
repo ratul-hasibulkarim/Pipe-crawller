@@ -13,4 +13,5 @@ ignore = ["D203", "D213", "D100", "D104", "D105", "D107", "B008", "B023"]
 "cad/build.py" = ["E501"]  # assembly-manual prose
 
 [tool.black]
-line-length = 150
+line-length = 160
+extend-exclude = "(pi/app/protocol_gen.py|firmware/|app/|cad/exports/)"

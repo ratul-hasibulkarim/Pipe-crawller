@@ -161,10 +161,17 @@ def evaluate_size(p: Params, size: str) -> tuple[dict[str, float], list[Check]]:
     sf_min = mu_w * n_arms * (f_arm - k_arm * comp) / weight
     d["sf_min_transient"] = sf_min
     chk.append(Check("vertical wet SF at worst spring excursion", sf_min, c["min_transient_safety_factor"], ">=", "-"))
-    d["wet_sf_at_max_grip"] = mu_w * n_arms * f_max / weight
-    t1_margin = mu_d * n_arms * f_max / (c["hold_test_load_multiple"] * weight)
+    # The hall slide sensor saturates when the rocker reaches its stop (preload + k * full slide
+    # = working + k * travel), so the firmware can only servo below that, minus the force
+    # servo's overshoot band (half the re-grip deadband, at least 1 N).
+    # Forces past the stop are structural and unmeasured, so grip margins use this limit.
+    f_sense = f_arm + k_arm * comp
+    f_ctrl = min(f_max, f_sense - max(1.0, 0.5 * max(1.0, 0.03 * f_arm)))
+    d.update(grip_sense_max_n=f_sense, grip_limit_n=f_ctrl)
+    d["wet_sf_at_max_grip"] = mu_w * n_arms * f_ctrl / weight
+    t1_margin = mu_d * n_arms * f_ctrl / (c["hold_test_load_multiple"] * weight)
     d["t1_dry_margin"] = t1_margin
-    chk.append(Check("T1 dry hold margin at max grip", t1_margin, c["hold_test_min_margin"], ">=", "-"))
+    chk.append(Check("T1 dry hold margin at controllable max grip", t1_margin, c["hold_test_min_margin"], ">=", "-"))
     r_min = s["pipe_id_min_mm"] / 2 * 1e-3
     skew = math.sin(math.radians(c["wheel_alignment_error_deg"]))
     roll_demand = weight * (s["cg_offset_mm"] * 1e-3 + skew * r_min)
@@ -173,20 +180,25 @@ def evaluate_size(p: Params, size: str) -> tuple[dict[str, float], list[Check]]:
 
     # ---- Expansion mechanism (worm-sector levers) ---------------------------
     geo = mech.arm_geometry(p, size)
-    th0 = mech.theta_for_pipe(geo, s["pipe_id_min_mm"])
-    th1 = mech.theta_for_pipe(geo, s["pipe_id_max_mm"])
+    th0, th1 = mech.stroke(p, size)
     lo, hi = c["lever_angle_limits_deg"]
     d.update(theta_min_deg=math.degrees(th0), theta_max_deg=math.degrees(th1))
     chk.append(Check("lever angle at min pipe >= limit", math.degrees(th0), lo, ">=", "deg"))
     chk.append(Check("lever angle at max pipe <= limit", math.degrees(th1), hi, "<=", "deg"))
     samples = mech.theta_samples(th0, th1)
     tq = [mech.lever_torque_nm(geo, th, f_max, mu_d * f_max) for th in samples]
-    t_lever = max(tq)
+    t_lever = max(tq)  # per arm; the motor sees the sum, which sag does not change (below)
+    # Horizontal pipe, one arm straight down: F_bottom = F0 + 2W/3, F_top = F0 - W/3 each
+    # (sum unchanged, so the expansion motor load is not). The bottom arm's lever, sector
+    # and worm carry the extra statically, through the rocker stop once the slide bottoms.
+    f_struct = max(f_max, f_ctrl + 2.0 * weight / 3.0)
+    t_struct = max(mech.lever_torque_nm(geo, th, f_struct, mu_d * f_max) for th in samples)  # traction stays drive-limited
+    d.update(bottom_arm_horizontal_n=f_ctrl + 2.0 * weight / 3.0, arm_structural_load_n=f_struct)
     e = s["expansion"]
     ew = c["expansion_worm"]
     wm_e = expansion_worm(p, size)
     r_sector = e["sector_module_mm"] * e["sector_teeth"] / 2
-    f_tooth = t_lever / (r_sector * 1e-3)
+    f_tooth = t_struct / (r_sector * 1e-3)
     sigma = lewis_stress_mpa(f_tooth, e["sector_face_mm"], e["sector_module_mm"], ew["lewis_form_factor"])
     exp_m = p["motors"][e["motor"]]
     ratio = expansion_ratio(s)
@@ -222,8 +234,8 @@ def evaluate_size(p: Params, size: str) -> tuple[dict[str, float], list[Check]]:
     st, lv = c["arm_structure"], s["lever"]
     t_pl, h_pl = lv["plate_thickness_mm"], lv["plate_height_mm"]
     i_lever = 2 * t_pl * h_pl**3 / 12
-    sigma_lever = t_lever * 1e3 * (h_pl / 2) / i_lever
-    defl = f_max * geo.lever_len**3 / (3 * st["e_modulus_gpa"] * 1e3 * i_lever)
+    sigma_lever = t_struct * 1e3 * (h_pl / 2) / i_lever
+    defl = f_struct * geo.lever_len**3 / (3 * st["e_modulus_gpa"] * 1e3 * i_lever)
     defl_print = defl * st["e_modulus_gpa"] / st["printed_e_modulus_gpa"]
     d.update(lever_stress_mpa=sigma_lever, lever_deflection_mm=defl, lever_deflection_printed_mm=defl_print)
     chk.append(Check(f"lever bending stress ({st['material']})", sigma_lever, st["yield_mpa"] / st["min_yield_sf"], "<=", "MPa"))

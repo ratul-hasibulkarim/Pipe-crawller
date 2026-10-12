@@ -82,7 +82,7 @@ async def fake_mcu():
 @pytest.fixture
 def sil_binary() -> Path:
     """Path to the size-M SIL binary (skips when not built)."""
-    b = ROOT / "firmware" / "build" / "sil" / "pipebot_sil_M"
+    b = ROOT / "build" / "sil" / "pipebot_sil_M"
     if not b.exists():
         pytest.skip("SIL not built (make sim)")
     return b

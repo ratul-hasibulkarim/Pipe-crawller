@@ -15,16 +15,16 @@ Generated from `firmware/include/pinmap.h` by `tools/gen_pinmap_doc.py` - edit t
 | Stepper drivers | GP7 | PIO0 SM1 | STEP drive B - fallback |
 | Stepper drivers | GP8 | PIO0 SM2 | STEP drive C - fallback |
 | Stepper drivers | GP9 | PIO0 SM3 | STEP expansion - fallback |
-| Stepper drivers | GP10 | PWM5 A | IR 850 nm LED driver DIM |
-| Stepper drivers | GP11 | GPIO in | E-stop loop sense (pull-up; low = loop closed = OK). Same loop drops the driver ENABLE relay. |
-| Stepper drivers | GP12 | GPIO in | supply path status (LTC4412 STAT; high = running from the battery) |
-| Stepper drivers | GP13 | GPIO out | camera/ToF window heater MOSFET (anti-fog) |
-| Stepper drivers | GP14 | GPIO out | DRIVE_EN, active low, 3 drive drivers (hardware E-stop relay in series) |
-| Stepper drivers | GP15 | GPIO out | EXPAND_EN, active low, expansion driver |
-| Stepper drivers | GP16 | SPI0 RX | TMC5160 SDO (size L) / spare |
-| Stepper drivers | GP17 | SPI0 CSn | TMC5160 chip select via 74HC138 (size L) / spare |
-| Stepper drivers | GP18 | SPI0 SCK | TMC5160 SCK (size L) / spare |
-| Stepper drivers | GP19 | SPI0 TX | TMC5160 SDI (size L) / spare |
+| Lights, safety, power status | GP10 | PWM5 A | IR 850 nm LED driver DIM |
+| Lights, safety, power status | GP11 | GPIO in | E-stop loop sense (pull-up; low = loop closed = OK). Same loop drops the driver ENABLE relay. |
+| Lights, safety, power status | GP12 | GPIO in | supply path status (LTC4412 STAT; high = running from the battery) |
+| Lights, safety, power status | GP13 | GPIO out | camera/ToF window heater MOSFET (anti-fog) |
+| Driver enables (the hardware E-stop loop is in series) | GP14 | GPIO out | DRIVE_EN, active low, 3 drive drivers (hardware E-stop relay in series) |
+| Driver enables (the hardware E-stop loop is in series) | GP15 | GPIO out | EXPAND_EN, active low, expansion driver |
+| SPI: TMC5160 drivers on size L | GP16 | SPI0 RX | TMC5160 SDO (size L) / spare |
+| SPI: TMC5160 drivers on size L | GP17 | SPI0 CSn | TMC5160 chip select via 74HC138 (size L) / spare |
+| SPI: TMC5160 drivers on size L | GP18 | SPI0 SCK | TMC5160 SCK (size L) / spare |
+| SPI: TMC5160 drivers on size L | GP19 | SPI0 TX | TMC5160 SDI (size L) / spare |
 | Slow I2C, core 1 @ 400 kHz: environment / IMU / power | GP20 | I2C0 SDA | BNO085 0x4A, VL53L1X 0x29 (front) / 0x2A (rear), SHT31 0x44, BMP390 0x77, INA219 0x40/0x41, ADS1115 0x48 |
 | Slow I2C, core 1 @ 400 kHz: environment / IMU / power | GP21 | I2C0 SCL | sensor bus clock |
 | Slow I2C, core 1 @ 400 kHz: environment / IMU / power | GP22 | GPIO out | VL53L1X rear XSHUT (low at boot so the front sensor is re-addressed first) |
@@ -34,7 +34,7 @@ Generated from `firmware/include/pinmap.h` by `tools/gen_pinmap_doc.py` - edit t
 | Analog | GP26 | ADC0 | grip hall sensor arm A (DRV5055A1; 0.6-2.7 V over the 10 mm slide) |
 | Analog | GP27 | ADC1 | grip hall sensor arm B |
 | Analog | GP28 | ADC2 | grip hall sensor arm C |
-| Analog | GP29 | PWM6 B | white LED driver DIM (4 x 1 W constant-current buck) |
+| White light | GP29 | PWM6 B | white LED driver DIM (4 x 1 W constant-current buck) |
 
 I2C addresses: BNO085 0x4A, VL53L1X 0x29/0x2A, SHT31 0x44, BMP390 0x77, INA219 0x40 (drive) / 0x41 (expansion),
 ADS1115 0x48, TCA9548A 0x70 (encoder bus) with AS5600 0x36 on mux channels 0-4.

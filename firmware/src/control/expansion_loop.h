@@ -31,6 +31,9 @@ class ExpansionLoop {
   const float* slides() const { return slide_; }
   float gripMin() const;
   float gripAvg() const;
+  // Squeeze = median arm reading: squeezing loads all three arms, body sag only the bottom
+  // one (whose sensor may saturate on its stop while the others read normal).
+  float gripSqueeze() const;
   bool allContact() const;
   int contactCount() const;
   float effForce(int arm) const;
@@ -46,7 +49,8 @@ class ExpansionLoop {
   void setCurrentA(float a) { current_a_ = a; }
 
  private:
-  float theta_ = 0, omega_ = 0, prev_theta_ = 0;
+  float theta_ = 0, omega_ = 0, enc_theta_ = 0, prev_enc_ = 0;
+  bool theta_init_ = false;
   float grip_[3] = {0, 0, 0}, slide_[3] = {0, 0, 0};
   bool done_ = true, stall_ = false, over_current_ = false, no_contact_ = false, enc_ok_ = true, have_prev_ = false;
   float stall_s_ = 0, oc_s_ = 0, maintain_s_ = 0;

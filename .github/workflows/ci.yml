@@ -1,0 +1,91 @@
+# Runs on every push: generated files must be up to date, every design check must pass,
+# firmware builds warning-free (-Werror) for all sizes, every test suite and the
+# acceptance tests (CI length) pass on the simulator.
+name: ci
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  params-and-lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12", cache: pip}
+      - run: pip install PyYAML ruff black pytest
+      - name: make params (fails if a design check fails)
+        run: make params
+      - name: generated files are committed
+        run: git diff --exit-code -- firmware/include pi/app app/src/types protocol docs/pinmap.md
+      - run: make lint
+      - run: python -m pytest -q tests/unit
+
+  firmware:
+    runs-on: ubuntu-24.04
+    needs: params-and-lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12", cache: pip}
+      - uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: pio-${{ hashFiles('firmware/platformio.ini') }}
+      - run: pip install PyYAML platformio
+      - name: native unit tests (-Wall -Wextra -Werror)
+        run: make fw-native
+      - name: RP2040 build S/M/L (-Werror)
+        run: make fw-target
+
+  cad:
+    runs-on: ubuntu-24.04
+    needs: params-and-lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12", cache: pip}
+      - run: pip install -r cad/requirements.txt
+      - name: CAD build + interference + mass (fails on any error)
+        run: python cad/build.py --no-stl
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cad-exports
+          path: cad/exports
+
+  sim-pi-acceptance:
+    runs-on: ubuntu-24.04
+    needs: params-and-lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12", cache: pip}
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg libavdevice-dev libsrtp2-dev libopus-dev libvpx-dev
+      - run: pip install -r pi/requirements.txt
+      - run: make sim
+      - name: Pi companion tests (against the simulator over TCP)
+        run: python -m pytest -q pi/tests
+      - name: acceptance T1-T15 (CI length)
+        run: make acceptance QUICK=1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: acceptance
+          path: |
+            docs/acceptance_report.md
+            tests/acceptance/out
+
+  app:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - run: make app

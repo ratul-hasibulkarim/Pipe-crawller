@@ -195,6 +195,14 @@ def worm_sector(sz: Size) -> Part:
     m = e["sector_module_mm"]
     r_in, r_out = pivot_boss_r(sz) + 2.0, sz.sector_r - 1.25 * m - 3 * m
     if r_out - r_in > 6:
+        # cast-gear web: full face at the toothed rim and the hub, thinner disc between
+        web = max(0.45 * e["sector_face_mm"], 4.0)
+        if 2 * fw - web > 1.0:
+            inset = math.degrees(3 * m / r_out)
+            arc = [a0 + inset + (a1 - a0 - 2 * inset) * i / 24 for i in range(25)]
+            ring = [(r_out * math.cos(math.radians(a)), r_out * math.sin(math.radians(a))) for a in arc]
+            ring += [(r_in * math.cos(math.radians(a)), r_in * math.sin(math.radians(a))) for a in reversed(arc)]
+            w = w.cut(P.xz_prism(ring, web / 2, fw + 1)).cut(P.xz_prism(ring, -fw - 1, -web / 2))
         rm, rr = (r_in + r_out) / 2, (r_out - r_in) / 2 * 0.8
         span = a1 - a0
         n = max(1, int(span / math.degrees(2.6 * rr / rm)))

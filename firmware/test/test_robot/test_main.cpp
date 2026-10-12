@@ -177,6 +177,17 @@ void test_regrip_when_pipe_widens() {
   TEST_ASSERT_TRUE(h.robot->expansion().gripMin() > params::GRIP_LOW_N);
 }
 
+void test_diameter_estimate_while_gripping() {
+  for (const double incline : {90.0, 0.0}) {
+    sim::PlantConfig c = vertical(true);
+    c.sections[0].incline_deg = incline;
+    Harness h(c);
+    h.runWith(3.0, 0.15, [&] { h.expandForce(params::DEFAULT_GRIP_TARGET_N); });
+    // the slides are mid-travel when gripping: ignoring them reads ~2 x 5 mm too large
+    TEST_ASSERT_FLOAT_WITHIN(1.5f, c.sections[0].id_mm, h.robot->expansion().diameter());
+  }
+}
+
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_boot_inside_pipe_assumes_grip);
@@ -185,5 +196,6 @@ int main() {
   RUN_TEST(test_estop_cuts_enable_lines_and_needs_clear);
   RUN_TEST(test_tether_brownout_on_tether_only_robot_holds_mechanically);
   RUN_TEST(test_regrip_when_pipe_widens);
+  RUN_TEST(test_diameter_estimate_while_gripping);
   return UNITY_END();
 }

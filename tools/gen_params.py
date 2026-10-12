@@ -31,8 +31,7 @@ def size_constants(p: dict, size: str) -> dict[str, float | int]:
     c, s = p["common"], p["sizes"][size]
     lim, ctl, pw = c["motor_limits"], c["control"], c["power"]
     geo = mech.arm_geometry(p, size)
-    th0 = mech.theta_for_pipe(geo, s["pipe_id_min_mm"])
-    th1 = mech.theta_for_pipe(geo, s["pipe_id_max_mm"])
+    th0, th1 = mech.stroke(p, size)
     drv = p["motors"][s["drive"]["motor"]]
     exp_m = p["motors"][s["expansion"]["motor"]]
     usteps = lim["steps_per_rev"] * lim["microsteps"]
@@ -72,13 +71,22 @@ def size_constants(p: dict, size: str) -> dict[str, float | int]:
         "MAX_GRIP_N": s["max_grip_force_per_arm_n"],
         "WORKING_GRIP_N": round(grip_work, 2),
         "SPRING_RATE_N_MM": k,
+        "CONTACT_STIFFNESS_N_MM": s["rocker"]["contact_stiffness_n_mm"],  # tread + frame squash under load
         # spring sits at mid-travel at the working grip: preload = working - k * travel
         "SPRING_PRELOAD_N": round(grip_work - k * c["arm_compliance_travel_mm"], 2),
         "COMPLIANCE_TRAVEL_MM": c["arm_compliance_travel_mm"],
+        "INSERTION_CLEARANCE_MM": c["insertion_clearance_mm"],
         "CONTACT_SLIDE_MM": 0.3,
+        # hall sensor saturates at the rocker stop: preload + k * 2 * travel = working + k * travel
+        "GRIP_SENSE_MAX_N": round(grip_work + k * c["arm_compliance_travel_mm"], 2),
+        "GRIP_LIMIT_N": round(
+            min(s["max_grip_force_per_arm_n"], grip_work + k * c["arm_compliance_travel_mm"] - max(1.0, 0.5 * max(1.0, 0.03 * grip_work))), 2
+        ),
         "GRIP_LOW_N": round(0.6 * grip_work, 2),
         "REGRIP_DEADBAND_N": round(max(1.0, 0.03 * grip_work), 2),
-        "DEFAULT_GRIP_TARGET_N": round(min(grip_work + max(1.0, 0.03 * grip_work) * 0.5, s["max_grip_force_per_arm_n"] - 2 * max(1.0, 0.03 * grip_work)), 2),
+        "DEFAULT_GRIP_TARGET_N": round(
+            min(grip_work + max(1.0, 0.03 * grip_work) * 0.5, grip_work + k * c["arm_compliance_travel_mm"] - 2 * max(1.0, 0.03 * grip_work)), 2
+        ),
         "MU_WET": c["wheel_wet_friction_coeff"],
         "MU_DRY": c["wheel_dry_friction_coeff"],
         "BATTERY_SERIES": series,
@@ -100,6 +108,20 @@ def size_constants(p: dict, size: str) -> dict[str, float | int]:
         "EXP_OVER_CURRENT_A": ctl["expand_over_current_frac"] * s["power"]["buck_motor_a"],
         "THERMAL_DERATE_C": ctl["thermal_derate_c"],
         "THERMAL_TRIP_C": ctl["thermal_trip_c"],
+        # hull to air: 1 / (h * cylinder area); the hull spreads every motor's heat
+        "HULL_RTH_K_PER_W": round(
+            1.0
+            / (
+                c["thermal"]["hull_convection_w_m2k"]
+                * math.pi
+                * s["body_dia_mm"]
+                * sum(s["layout"][k] for k in ("rear_pod_mm", "mid_zone_mm", "joint_mm", "front_pod_mm"))
+                * 1e-6
+            ),
+            3,
+        ),
+        "DRIVER_RTH_K_PER_W": c["thermal"]["driver_to_hull_k_per_w"],
+        "THERMAL_TAU_S": c["thermal"]["time_constant_s"],
         "GIMBAL_TILT_MIN_DEG": c["gimbal_tilt_range_deg"][0],
         "GIMBAL_TILT_MAX_DEG": c["gimbal_tilt_range_deg"][1],
         "BEND_RADIUS_MM": c["bend_radius_over_pipe_id"] * s["pipe_id_min_mm"],
@@ -132,8 +154,7 @@ def size_constants(p: dict, size: str) -> dict[str, float | int]:
 def lut(p: dict, size: str, n: int = 33) -> list[tuple[float, float]]:
     """(pipe ID mm, theta rad) table."""
     geo = mech.arm_geometry(p, size)
-    th0 = mech.theta_for_pipe(geo, p["sizes"][size]["pipe_id_min_mm"])
-    th1 = mech.theta_for_pipe(geo, p["sizes"][size]["pipe_id_max_mm"])
+    th0, th1 = mech.stroke(p, size)
     return [(mech.pipe_for_theta(geo, th), th) for th in mech.theta_samples(th0, th1, n)]
 
 

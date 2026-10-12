@@ -7,11 +7,11 @@ S,tether_strain_relief,A_body,1,6061-T6,CNC / waterjet,31.3,15.0,15.0,TBD (quote
 S,bevel_crown,B_expansion,1,42CrMo4,CNC + induction hardened,10.2,15.0,15.0,TBD (quote),
 S,bevel_pinion,B_expansion,3,42CrMo4,CNC + induction hardened,1.5,15.0,45.0,TBD (quote),
 S,expansion_worm,B_expansion,3,42CrMo4,CNC + induction hardened,17.3,15.0,45.0,TBD (quote),"Single-start, lead angle 3.58 deg: self-locking."
-S,gearbox_bulkhead,B_expansion,1,6061-T6,CNC / waterjet,95.4,15.0,15.0,TBD (quote),Flooded gearbox (marine grease). Sector slots are open by design; dry pods are separately sealed.
+S,gearbox_bulkhead,B_expansion,1,6061-T6,CNC / waterjet,94.2,15.0,15.0,TBD (quote),Flooded gearbox (marine grease). Sector slots are open by design; dry pods are separately sealed.
 S,lever_plate,B_expansion,6,6061-T6,CNC / waterjet,7.3,15.0,90.0,TBD (quote),Waterjet 6061-T6 plate; D-hole keys it to the pivot shaft.
 S,pivot_shaft,B_expansion,3,42CrMo4,CNC + induction hardened,11.0,15.0,45.0,TBD (quote),
 S,worm_bearing_block,B_expansion,6,CuSn12,CNC (hobbed),1.4,15.0,90.0,TBD (quote),
-S,worm_sector,B_expansion,3,CuSn12,CNC (hobbed),37.1,15.0,45.0,TBD (quote),Keyed (D-flat) on the pivot shaft; teeth hobbed to match the worm.
+S,worm_sector,B_expansion,3,CuSn12,CNC (hobbed),39.5,15.0,45.0,TBD (quote),Keyed (D-flat) on the pivot shaft; teeth hobbed to match the worm.
 S,belt_tensioner,C_wheel,3,POM,CNC,0.1,15.0,45.0,TBD (quote),
 S,compliance_spring_retainer,C_wheel,6,SS316,CNC,0.5,15.0,90.0,TBD (quote),Spec 'return_spring_retainer'. Hall sensor (DRV5055) on the cap reads the stub-pin magnet.
 S,drive_motor_mount,C_wheel,3,6061-T6,CNC / waterjet,1.4,15.0,45.0,TBD (quote),
@@ -83,11 +83,11 @@ M,tether_strain_relief,A_body,1,6061-T6,CNC / waterjet,58.2,15.0,15.0,TBD (quote
 M,bevel_crown,B_expansion,1,42CrMo4,CNC + induction hardened,41.6,15.0,15.0,TBD (quote),
 M,bevel_pinion,B_expansion,3,42CrMo4,CNC + induction hardened,1.7,15.0,45.0,TBD (quote),
 M,expansion_worm,B_expansion,3,42CrMo4,CNC + induction hardened,61.4,15.0,45.0,TBD (quote),"Single-start, lead angle 3.58 deg: self-locking."
-M,gearbox_bulkhead,B_expansion,1,6061-T6,CNC / waterjet,264.3,39.64,39.64,TBD (quote),Flooded gearbox (marine grease). Sector slots are open by design; dry pods are separately sealed.
+M,gearbox_bulkhead,B_expansion,1,6061-T6,CNC / waterjet,261.8,39.26,39.26,TBD (quote),Flooded gearbox (marine grease). Sector slots are open by design; dry pods are separately sealed.
 M,lever_plate,B_expansion,6,6061-T6,CNC / waterjet,17.9,15.0,90.0,TBD (quote),Waterjet 6061-T6 plate; D-hole keys it to the pivot shaft.
 M,pivot_shaft,B_expansion,3,42CrMo4,CNC + induction hardened,36.5,15.0,45.0,TBD (quote),
 M,worm_bearing_block,B_expansion,6,CuSn12,CNC (hobbed),1.9,15.0,90.0,TBD (quote),
-M,worm_sector,B_expansion,3,CuSn12,CNC (hobbed),96.1,34.6,103.8,TBD (quote),Keyed (D-flat) on the pivot shaft; teeth hobbed to match the worm.
+M,worm_sector,B_expansion,3,CuSn12,CNC (hobbed),104.2,37.51,112.53,TBD (quote),Keyed (D-flat) on the pivot shaft; teeth hobbed to match the worm.
 M,belt_tensioner,C_wheel,3,POM,CNC,0.4,15.0,45.0,TBD (quote),
 M,compliance_spring_retainer,C_wheel,6,SS316,CNC,0.6,15.0,90.0,TBD (quote),Spec 'return_spring_retainer'. Hall sensor (DRV5055) on the cap reads the stub-pin magnet.
 M,drive_motor_mount,C_wheel,3,6061-T6,CNC / waterjet,4.7,15.0,45.0,TBD (quote),
@@ -160,17 +160,17 @@ L,tether_strain_relief,A_body,1,6061-T6,CNC / waterjet,237.7,35.65,35.65,TBD (qu
 L,bevel_crown,B_expansion,1,42CrMo4,CNC + induction hardened,234.7,56.34,56.34,TBD (quote),
 L,bevel_pinion,B_expansion,3,42CrMo4,CNC + induction hardened,23.7,15.0,45.0,TBD (quote),
 L,expansion_worm,B_expansion,3,42CrMo4,CNC + induction hardened,322.6,77.43,232.29,TBD (quote),"Single-start, lead angle 3.58 deg: self-locking."
-L,gearbox_bulkhead,B_expansion,1,6061-T6,CNC / waterjet,1192.6,178.89,178.89,TBD (quote),Flooded gearbox (marine grease). Sector slots are open by design; dry pods are separately sealed.
-L,lever_plate,B_expansion,6,6061-T6,CNC / waterjet,103.8,15.58,93.48,TBD (quote),Waterjet 6061-T6 plate; D-hole keys it to the pivot shaft.
-L,pivot_shaft,B_expansion,3,42CrMo4,CNC + induction hardened,152.3,36.56,109.68,TBD (quote),
+L,gearbox_bulkhead,B_expansion,1,6061-T6,CNC / waterjet,1115.2,167.28,167.28,TBD (quote),Flooded gearbox (marine grease). Sector slots are open by design; dry pods are separately sealed.
+L,lever_plate,B_expansion,6,6061-T6,CNC / waterjet,95.1,15.0,90.0,TBD (quote),Waterjet 6061-T6 plate; D-hole keys it to the pivot shaft.
+L,pivot_shaft,B_expansion,3,42CrMo4,CNC + induction hardened,149.4,35.85,107.55,TBD (quote),
 L,worm_bearing_block,B_expansion,6,CuSn12,CNC (hobbed),2.9,15.0,90.0,TBD (quote),
-L,worm_sector,B_expansion,3,CuSn12,CNC (hobbed),348.5,125.47,376.41,TBD (quote),Keyed (D-flat) on the pivot shaft; teeth hobbed to match the worm.
+L,worm_sector,B_expansion,3,CuSn12,CNC (hobbed),393.3,141.59,424.77,TBD (quote),Keyed (D-flat) on the pivot shaft; teeth hobbed to match the worm.
 L,belt_tensioner,C_wheel,3,POM,CNC,1.4,15.0,45.0,TBD (quote),
 L,compliance_spring_retainer,C_wheel,6,SS316,CNC,0.8,15.0,90.0,TBD (quote),Spec 'return_spring_retainer'. Hall sensor (DRV5055) on the cap reads the stub-pin magnet.
 L,drive_motor_mount,C_wheel,3,6061-T6,CNC / waterjet,12.4,15.0,45.0,TBD (quote),
 L,rocker_plate,C_wheel,6,6061-T6,CNC / waterjet,80.4,15.0,90.0,TBD (quote),Spec 'arm_carriage': carries both axles + the drive pod.
 L,slide_bushing,C_wheel,6,POM,CNC,0.1,15.0,90.0,TBD (quote),
-L,stub_pin,C_wheel,6,42CrMo4,CNC + induction hardened,2.3,15.0,90.0,TBD (quote),
+L,stub_pin,C_wheel,6,42CrMo4,CNC + induction hardened,2.1,15.0,90.0,TBD (quote),
 L,wheel_axle,C_wheel,6,42CrMo4,CNC + induction hardened,30.0,15.0,90.0,TBD (quote),
 L,wheel_crown_mold,C_wheel,0,PETG,FDM,90.2,6.77,0.0,TBD (quote),"Tooling: print 2 halves, mirror one. Sprue + 2 dowel pins."
 L,wheel_hub,C_wheel,6,PA12-CF,FDM / SLS,48.5,11.64,69.84,TBD (quote),"Printed flat (axis vertical); D-bore, no supports."

@@ -11,6 +11,7 @@ import argparse
 import csv
 import json
 import math
+import shutil
 import sys
 import time
 from pathlib import Path
@@ -273,6 +274,10 @@ def main() -> int:
         p = r.p
         out = EXPORTS / size
         out.mkdir(parents=True, exist_ok=True)
+        # drop exports of parts that a parameter change renamed or removed
+        for sub, keep in (("step", True), ("png", not a.no_thumbs), ("stl", not a.no_stl)):
+            if keep and (out / sub).is_dir():
+                shutil.rmtree(out / sub)
         errs = r.check_quantities(r.instances(r.sz.theta_min))
         for pt in r.parts.values():
             errs += print_orientation_errors(pt)

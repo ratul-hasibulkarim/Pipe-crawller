@@ -158,7 +158,7 @@ void Robot::handleFrame(const comm::Frame& f) {
       if (mode == proto::ExpandMode::DIAMETER)
         ok_arg = m.target >= params::PIPE_ID_MIN_MM - 5.0f && m.target <= params::PIPE_ID_MAX_MM + 5.0f;
       else if (mode == proto::ExpandMode::FORCE)
-        ok_arg = m.target > 0.0f && m.target <= params::MAX_GRIP_N;
+        ok_arg = m.target > 0.0f && m.target <= params::GRIP_LIMIT_N;
       else if (mode != proto::ExpandMode::RETRACT)
         ok_arg = false;
       if (!ok_arg) {
@@ -266,7 +266,7 @@ void Robot::handleFrame(const comm::Frame& f) {
         case proto::Param::DRIVE_CURRENT_A: drive_.setCurrentA(ctl::clampf(m.value, 0.1f, params::DRIVE_CURRENT_A)); break;
         case proto::Param::EXPAND_CURRENT_A: exp_.setCurrentA(ctl::clampf(m.value, 0.1f, params::EXPANSION_CURRENT_A)); break;
         case proto::Param::WHEEL_DIA_MM: ok = m.value > 0.5f * params::WHEEL_DIA_MM && m.value < 1.5f * params::WHEEL_DIA_MM; if (ok) drive_.setWheelDia(m.value); break;
-        case proto::Param::GRIP_TARGET_N: ok = m.value > params::SPRING_PRELOAD_N && m.value <= params::MAX_GRIP_N; if (ok) grip_target_ = m.value; break;
+        case proto::Param::GRIP_TARGET_N: ok = m.value > params::SPRING_PRELOAD_N && m.value <= params::GRIP_LIMIT_N; if (ok) grip_target_ = m.value; break;
         case proto::Param::ODOM_RESET: odom_.reset(); break;
         default: ok = false; break;
       }

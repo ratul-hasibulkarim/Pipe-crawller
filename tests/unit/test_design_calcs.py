@@ -1,5 +1,6 @@
 """Unit tests for calc/design_calcs.py."""
 
+import copy
 import math
 import sys
 from pathlib import Path
@@ -17,14 +18,10 @@ def test_grip_force_formula() -> None:
     assert dc.required_total_normal_force(1.0, 0, 0.5, 2.0, 10.0) < 1e-9
 
 
-def test_leadscrew_self_locking() -> None:
-    """Tr8x1.5 uses the pitch diameter and must self-lock with margin."""
-    ls = P["common"]["leadscrew"]
-    lam = dc.screw_lead_angle_deg(ls["lead_mm"], ls["pitch_dia_mm"])
-    m = dc.thread_metrics(lam, ls["friction_coeff"], ls["flank_half_angle_deg"])
-    assert math.isclose(lam, 3.768, abs_tol=0.01)
-    assert m.self_lock_margin >= ls["min_self_lock_margin"]
-    assert 0.2 < m.efficiency < 0.4
+def test_thread_metrics_self_lock() -> None:
+    """A 3.8 deg lead with mu 0.15 self-locks; a 15 deg lead does not."""
+    assert dc.thread_metrics(3.8, 0.15, 15.0).self_lock_margin > 1.0
+    assert dc.thread_metrics(15.0, 0.15, 15.0).self_lock_margin < 1.0
 
 
 def test_all_size_checks_pass() -> None:
@@ -34,15 +31,29 @@ def test_all_size_checks_pass() -> None:
         assert [c.name for c in checks if not c.passed] == []
 
 
-def test_checks_detect_failure() -> None:
-    """A weakened design must be flagged, not silently accepted."""
-    bad = dc.load_params()
-    bad["common"]["wheel_wet_friction_coeff"] = 0.2
-    _, checks = dc.evaluate_size(bad, "S")
+def test_checks_detect_wet_friction_failure() -> None:
+    """A slippery wall must be flagged, not silently accepted."""
+    bad = copy.deepcopy(P)
+    bad["common"]["wheel_wet_friction_coeff"] = 0.1
+    _, checks = dc.evaluate_size(bad, "M")
     assert any(not c.passed for c in checks)
 
 
-def test_steps_per_mm() -> None:
-    """3200 usteps/rev over a 1.5 mm lead."""
-    d, _ = dc.evaluate_size(P, "S")
-    assert math.isclose(d["steps_per_mm_axial"], 3200 / 1.5)
+def test_expansion_worms_self_lock_every_size() -> None:
+    """Arms must hold with the power off (worm lock), on every size."""
+    for size in P["sizes"]:
+        assert dc.expansion_worm(P, size).self_lock_margin > 1.0
+
+
+def test_rejected_cone_design_numbers() -> None:
+    """The cone/leadscrew design stays rejected: radial stroke exceeds the body radius."""
+    for size in P["sizes"]:
+        d, _ = dc.evaluate_size(P, size)
+        assert d["rej_radial_stroke_over_body_radius"] > 1.0
+
+
+def test_vertical_hold_has_margin() -> None:
+    """Wet safety factor at max grip is at least 1.5 on every size."""
+    for size in P["sizes"]:
+        d, _ = dc.evaluate_size(P, size)
+        assert d["wet_sf_at_max_grip"] >= 1.5

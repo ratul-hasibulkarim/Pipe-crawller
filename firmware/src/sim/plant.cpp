@@ -12,8 +12,6 @@ constexpr double kPi = 3.14159265358979;
 constexpr double kDeg = kPi / 180.0;
 constexpr double kBodyMu = 0.3;
 constexpr double kKineticFrac = 0.85;
-constexpr double kDriverRth = 1.6;    // K/W, driver + motor case to pod air (model)
-constexpr double kDriverTau = 90.0;   // s
 constexpr double kBatteryRint = 0.05; // ohm per cell
 }  // namespace
 
@@ -29,7 +27,7 @@ Plant::Plant(const PlantConfig& cfg) : cfg_(cfg), rng_(cfg.seed ? cfg.seed : 1) 
   if (cfg_.start_gripped) {
     // lever angle that puts the slides at mid-travel in the local pipe
     const double r_pipe = sectionAt(x_m).id_mm * 0.5;
-    const double k_struct = 100.0 * params::SPRING_RATE_N_MM + 50.0;
+    const double k_struct = params::CONTACT_STIFFNESS_N_MM;
     const double interf = params::SPRING_PRELOAD_N / k_struct + params::COMPLIANCE_TRAVEL_MM;
     const double s = (r_pipe + interf - params::WHEEL_DIA_MM * 0.5 - params::ROCKER_OFFSET_MM - params::PIVOT_R_MM) / params::LEVER_LEN_MM;
     theta = std::asin(std::clamp(s, -1.0, 1.0));
@@ -61,7 +59,7 @@ double Plant::armForce(double interference, double& slide) const {
   const double k = params::SPRING_RATE_N_MM;
   const double p0 = params::SPRING_PRELOAD_N;
   const double travel = 2.0 * params::COMPLIANCE_TRAVEL_MM;
-  const double k_struct = 100.0 * k + 50.0;
+  const double k_struct = params::CONTACT_STIFFNESS_N_MM;  // tread + frame
   slide = 0;
   if (interference <= 0) return 0;
   const double d0 = p0 / k_struct;
@@ -155,7 +153,8 @@ void Plant::step(double dt) {
   for (auto& a : arm) sum_f += a.force_n;
 
   // ---------------- drive: stick/slip axial dynamics
-  const double mu = (sec.wet || wet_override) ? params::MU_WET : params::MU_DRY;
+  const bool wet_now = sec.wet || wet_override;
+  const double mu = wet_now ? (sec.mu_wet > 0 ? sec.mu_wet : params::MU_WET) : (sec.mu_dry > 0 ? sec.mu_dry : params::MU_DRY);
   const double r_wheel = params::WHEEL_DIA_MM * 0.5e-3;
   double u[3];
   for (int i = 0; i < 3; ++i) {
@@ -228,15 +227,18 @@ void Plant::step(double dt) {
   }
 
   // ---------------- power
-  double p_drive = 0, p_exp = 0;
+  double p_drive = 0, p_exp = 0, p_copper_max = 0;
   for (int i = 0; i < 3; ++i) {
     if (!(powered && drive_enable_line && stepper_en[i])) continue;
     const double cur = params::DRIVE_RATED_A * current_scale[i] * (u[i] != 0 ? 0.7 : params::HOLD_CURRENT_FRAC);
-    p_drive += 2 * params::DRIVE_WINDING_OHM * cur * cur;
+    const double p_cu = 2 * params::DRIVE_WINDING_OHM * cur * cur;
+    p_copper_max = std::fmax(p_copper_max, p_cu);
+    p_drive += p_cu;
     if (sum_f > 1e-6) p_drive += std::fabs(traction * v_m_s) * (arm[i].force_n / sum_f) / (params::DRIVE_WORM_EFF * 0.4);
   }
   if (powered && expand_enable_line && stepper_en[3] && omega != 0) {
     const double cur = params::EXP_RATED_A * 0.7 * current_scale[3];
+    p_copper_max = std::fmax(p_copper_max, 2 * params::EXP_WINDING_OHM * cur * cur);
     p_exp = 2 * params::EXP_WINDING_OHM * cur * cur + std::fabs(lever_torque * omega) / std::max(0.05, static_cast<double>(params::EXP_CHAIN_EFF));
   }
   drive_a = p_drive / params::MOTOR_RAIL_V;
@@ -262,7 +264,10 @@ void Plant::step(double dt) {
     on_battery = false;
   }
   mcu_powered = bus_v > 9.0;
-  driver_temp_c += ((ambient_c + kDriverRth * (p_drive + p_exp)) - driver_temp_c) / kDriverTau * dt;
+  // hottest component = hull (every loss: copper, gearbox, driver) + the hottest motor's own
+  // copper loss through its mount / thermal pad to the hull
+  const double t_ss = ambient_c + params::HULL_RTH_K_PER_W * (p_drive + p_exp) + params::DRIVER_RTH_K_PER_W * p_copper_max;
+  driver_temp_c += (t_ss - driver_temp_c) / params::THERMAL_TAU_S * dt;
 
   // ---------------- gimbal
   if (powered) {

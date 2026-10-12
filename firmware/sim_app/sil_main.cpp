@@ -68,6 +68,8 @@ sim::PlantConfig plantConfig(const mjson::Value& p) {
     ps.wet = s.boolean("wet", false);
     ps.water_depth_m = s.num("water_depth_m", 0);
     ps.gas_ppm = s.num("gas_ppm", 0);
+    ps.mu_dry = s.num("mu_dry", -1);
+    ps.mu_wet = s.num("mu_wet", -1);
     c.sections.push_back(ps);
   }
   c.pipe_end_m = p.num("pipe_end_m", 1e9);
@@ -113,6 +115,7 @@ class Sil {
   proto::TelemetryMsg tel_{};
   bool have_tel_ = false;
   uint32_t tel_count_ = 0, boots_ = 0;
+  double first_tel_t_ = -1;
   std::vector<std::string> step_results_, event_log_;
   // metrics
   double min_bus_v_ = 1e9, max_temp_ = -1e9, max_axis_off_ = 0;
@@ -185,6 +188,7 @@ class Sil {
       if (!rx_.feed(b, f)) continue;
       if (f.type == proto::MsgType::TELEMETRY && tel_.unpack(f.payload, f.len)) {
         have_tel_ = true;
+        if (first_tel_t_ < 0) first_tel_t_ = t_;
         ++tel_count_;
       } else if (f.type == proto::MsgType::EVENT) {
         proto::EventMsg e;
@@ -248,7 +252,9 @@ class Sil {
       const State st = robotState();
       const bool busy = st == State::EXPANDING || st == State::RETRACTING;
       if (busy) step_seen_busy_ = true;
-      if (step_seen_busy_ && !busy && el > 0.3) {
+      // same rule as the Pi's refresh job: done once it was busy and stopped, or never got
+      // busy within 1 s (the firmware skips a grip that is already on target)
+      if (!busy && ((step_seen_busy_ && el > 0.3) || el > 1.0)) {
         finishStep(true, "");
         return;
       }
@@ -380,8 +386,9 @@ class Sil {
     const auto& p = rig_.plant;
     sm << "{\n \"size\": \"" << params::NAME << "\",\n \"duration_s\": " << t_ << ",\n \"final_state\": \""
        << kStateNames[static_cast<int>(robotState())] << "\",\n \"faults\": " << (have_tel_ ? tel_.faults : 0)
-       << ",\n \"telemetry_packets\": " << tel_count_ << ",\n \"expected_packets\": " << static_cast<long>(t_ * params::TELEMETRY_HZ)
-       << ",\n \"rx_errors\": " << (have_tel_ ? tel_.rx_errors : 0) << ",\n \"boots\": " << boots_ << ",\n \"x_m\": " << p.x_m
+       << ",\n \"telemetry_packets\": " << tel_count_ << ",\n \"first_telemetry_s\": " << first_tel_t_
+       << ",\n \"expected_packets\": " << static_cast<long>((t_ - std::fmax(0.0, first_tel_t_)) * params::TELEMETRY_HZ) + 1
+       << ",\n \"rx_errors\": " << (have_tel_ ? tel_.rx_errors : 0) << ",\n \"host_crc_rejects\": " << rx_.errors() << ",\n \"boots\": " << boots_ << ",\n \"x_m\": " << p.x_m
        << ",\n \"distance_m\": " << (have_tel_ ? tel_.distance_m : 0) << ",\n \"max_slip_mm\": " << p.max_slip_mm
        << ",\n \"min_bus_v\": " << min_bus_v_ << ",\n \"max_driver_temp_c\": " << max_temp_ << ",\n \"max_axis_offset_mm\": "
        << max_axis_off_ << ",\n \"soc\": " << p.soc << ",\n \"steps\": [\n";

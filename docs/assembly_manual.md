@@ -11,7 +11,7 @@ into heat-set inserts use 60 %. Use medium threadlocker on every screw in the ar
 | M3 | 0.80 | 0.48 |
 | M4 | 1.80 | 1.08 |
 
-## Size S (100-200 mm pipe)
+## Size S (102-200 mm pipe)
 
 ### A. Gearbox and rear pod (flooded gearbox: pack with marine grease, NLGI 2)
 1. Press 2x `worm_bearing_block` into each of the three radial bores of `gearbox_bulkhead`.
@@ -37,11 +37,11 @@ into heat-set inserts use 60 %. Use medium threadlocker on every screw in the ar
 17. `led_ring_mount` with 4 white + 2 IR LEDs and the front VL53L1X; `camera_window` dome with O-ring; `nose_bumper` into its groove.
 
 ### D. Final checks
-18. Mass 1.664 kg incl. wiring allowance (target 1.8 kg); CG radial offset 0.13 mm.
+18. Mass 1.671 kg incl. wiring allowance (target 1.8 kg); CG radial offset 0.13 mm.
 19. Run `tests/acceptance` T4 (diameter sweep) dry before the first pipe run; then T1 hold test.
 20. IP68: 30 min at 1 m (T13) with the gearbox flooded and the dry pods sealed.
 
-## Size M (150-320 mm pipe)
+## Size M (152-320 mm pipe)
 
 ### A. Gearbox and rear pod (flooded gearbox: pack with marine grease, NLGI 2)
 1. Press 2x `worm_bearing_block` into each of the three radial bores of `gearbox_bulkhead`.
@@ -67,7 +67,7 @@ into heat-set inserts use 60 %. Use medium threadlocker on every screw in the ar
 17. `led_ring_mount` with 4 white + 2 IR LEDs and the front VL53L1X; `camera_window` dome with O-ring; `nose_bumper` into its groove.
 
 ### D. Final checks
-18. Mass 4.0 kg incl. wiring allowance (target 4.2 kg); CG radial offset 0.21 mm.
+18. Mass 4.024 kg incl. wiring allowance (target 4.2 kg); CG radial offset 0.21 mm.
 19. Run `tests/acceptance` T4 (diameter sweep) dry before the first pipe run; then T1 hold test.
 20. IP68: 30 min at 1 m (T13) with the gearbox flooded and the dry pods sealed.
 
@@ -97,6 +97,6 @@ into heat-set inserts use 60 %. Use medium threadlocker on every screw in the ar
 17. `led_ring_mount` with 4 white + 2 IR LEDs and the front VL53L1X; `camera_window` dome with O-ring; `nose_bumper` into its groove.
 
 ### D. Final checks
-18. Mass 14.926 kg incl. wiring allowance (target 15.0 kg); CG radial offset 0.11 mm.
+18. Mass 14.92 kg incl. wiring allowance (target 15.0 kg); CG radial offset 0.11 mm.
 19. Run `tests/acceptance` T4 (diameter sweep) dry before the first pipe run; then T1 hold test.
 20. IP68: 30 min at 1 m (T13) with the gearbox flooded and the dry pods sealed.

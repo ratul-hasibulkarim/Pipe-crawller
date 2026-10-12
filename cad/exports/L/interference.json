@@ -3,17 +3,17 @@
   "collisions": [],
   "pipe": [],
   "positions": [
-    "theta=11.1deg pipe=300mm",
-    "theta=17.6deg pipe=355mm",
-    "theta=24.1deg pipe=408mm",
-    "theta=30.6deg pipe=458mm",
-    "theta=37.1deg pipe=506mm",
-    "theta=43.6deg pipe=549mm",
-    "theta=50.1deg pipe=588mm",
-    "theta=56.6deg pipe=622mm",
-    "theta=63.1deg pipe=650mm"
+    "theta=10.8deg pipe=298mm",
+    "theta=18.1deg pipe=359mm",
+    "theta=25.3deg pipe=418mm",
+    "theta=32.6deg pipe=473mm",
+    "theta=39.8deg pipe=524mm",
+    "theta=47.0deg pipe=570mm",
+    "theta=54.3deg pipe=610mm",
+    "theta=61.5deg pipe=643mm",
+    "theta=68.7deg pipe=670mm"
   ],
   "qty_errors": [],
-  "seconds": 72.2,
+  "seconds": 105.6,
   "passed": true
 }

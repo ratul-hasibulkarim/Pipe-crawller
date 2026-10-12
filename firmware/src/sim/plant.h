@@ -17,6 +17,7 @@ struct PipeSection {
   bool wet = false;
   double water_depth_m = 0; // robot submerged by this much (pressure sensor)
   double gas_ppm = 0;
+  double mu_dry = -1, mu_wet = -1;  // wall friction override (<0 = steel defaults from bot_params)
 };
 
 struct PlantConfig {

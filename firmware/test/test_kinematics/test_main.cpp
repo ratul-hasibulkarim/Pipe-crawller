@@ -17,8 +17,10 @@ void test_lut_matches_closed_form() {
 }
 
 void test_range_endpoints_and_clamping() {
-  TEST_ASSERT_FLOAT_WITHIN(0.01f, params::PIPE_ID_MIN_MM, kin::diameterForTheta(params::THETA_MIN_RAD));
-  TEST_ASSERT_FLOAT_WITHIN(0.01f, params::PIPE_ID_MAX_MM, kin::diameterForTheta(params::THETA_MAX_RAD));
+  // retracted: the wheels clear the min pipe for insertion; extended: they reach the max pipe
+  // with the slides fully compressed (calc/mechanism.py stroke())
+  TEST_ASSERT_FLOAT_WITHIN(0.01f, params::PIPE_ID_MIN_MM - 2 * params::INSERTION_CLEARANCE_MM, kin::diameterForTheta(params::THETA_MIN_RAD));
+  TEST_ASSERT_FLOAT_WITHIN(0.01f, params::PIPE_ID_MAX_MM + 4 * params::COMPLIANCE_TRAVEL_MM, kin::diameterForTheta(params::THETA_MAX_RAD));
   TEST_ASSERT_EQUAL_FLOAT(params::THETA_MAX_RAD, kin::thetaForDiameter(10000));
   TEST_ASSERT_EQUAL_FLOAT(params::THETA_MIN_RAD, kin::thetaForDiameter(1));
 }

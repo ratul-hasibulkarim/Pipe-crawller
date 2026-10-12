@@ -4,16 +4,16 @@
   "pipe": [],
   "positions": [
     "theta=2.5deg pipe=100mm",
-    "theta=8.3deg pipe=114mm",
-    "theta=14.1deg pipe=128mm",
-    "theta=20.0deg pipe=142mm",
-    "theta=25.8deg pipe=155mm",
-    "theta=31.7deg pipe=168mm",
-    "theta=37.5deg pipe=179mm",
-    "theta=43.4deg pipe=190mm",
-    "theta=49.2deg pipe=200mm"
+    "theta=10.2deg pipe=119mm",
+    "theta=17.9deg pipe=137mm",
+    "theta=25.6deg pipe=154mm",
+    "theta=33.3deg pipe=171mm",
+    "theta=41.0deg pipe=186mm",
+    "theta=48.7deg pipe=199mm",
+    "theta=56.4deg pipe=211mm",
+    "theta=64.2deg pipe=220mm"
   ],
   "qty_errors": [],
-  "seconds": 60.8,
+  "seconds": 92.8,
   "passed": true
 }

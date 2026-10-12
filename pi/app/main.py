@@ -151,7 +151,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "pipe_id_min_mm": p["PIPE_ID_MIN_MM"],
             "pipe_id_max_mm": p["PIPE_ID_MAX_MM"],
             "max_speed_mm_s": p["MAX_SPEED_MM_S"],
-            "max_grip_n": p["MAX_GRIP_N"],
+            "max_grip_n": p["GRIP_LIMIT_N"],
             "working_grip_n": p["WORKING_GRIP_N"],
             "default_grip_n": p["DEFAULT_GRIP_TARGET_N"],
             "grip_low_n": p["GRIP_LOW_N"],

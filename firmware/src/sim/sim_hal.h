@@ -14,7 +14,8 @@ class SimStepper : public hal::IStepper {
  public:
   SimStepper(Plant& p, int idx) : p_(p), i_(idx) {}
   void setVelocity(float v) override { p_.stepper_vel[i_] = v; }
-  void setCurrent(float run_a, float) override { run_a_ = run_a; }
+  // torque scales with the run current the firmware sets (thermal derate etc.)
+  void setCurrent(float run_a, float) override;
   void enable(bool on) override { p_.stepper_en[i_] = on; }
   bool enabled() const override { return p_.stepper_en[i_]; }
   hal::StepperStatus status() override;

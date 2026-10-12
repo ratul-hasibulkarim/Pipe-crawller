@@ -3,20 +3,20 @@
     "mass": {
       "by_module_kg": {
         "A_body": 0.348,
-        "B_expansion": 0.359,
+        "B_expansion": 0.365,
         "C_wheel": 0.17,
         "D_gimbal": 0.016,
         "E_accessories": 0.043,
         "purchased": 0.551
       },
-      "total_kg": 1.486,
+      "total_kg": 1.492,
       "allowance_frac": 0.12,
-      "with_allowance_kg": 1.664,
+      "with_allowance_kg": 1.671,
       "target_kg": 1.8,
       "cg_mm": [
         -0.13,
         -0.02,
-        55.55
+        53.84
       ],
       "cg_radial_offset_mm": 0.13,
       "cg_offset_param_mm": 3
@@ -49,20 +49,20 @@
     "mass": {
       "by_module_kg": {
         "A_body": 0.681,
-        "B_expansion": 1.012,
+        "B_expansion": 1.034,
         "C_wheel": 0.459,
         "D_gimbal": 0.03,
         "E_accessories": 0.088,
         "purchased": 1.302
       },
-      "total_kg": 3.571,
+      "total_kg": 3.593,
       "allowance_frac": 0.12,
-      "with_allowance_kg": 4.0,
+      "with_allowance_kg": 4.024,
       "target_kg": 4.2,
       "cg_mm": [
         -0.2,
         -0.03,
-        70.07
+        67.76
       ],
       "cg_radial_offset_mm": 0.21,
       "cg_offset_param_mm": 5
@@ -95,20 +95,20 @@
     "mass": {
       "by_module_kg": {
         "A_body": 2.076,
-        "B_expansion": 4.609,
-        "C_wheel": 1.252,
+        "B_expansion": 4.605,
+        "C_wheel": 1.251,
         "D_gimbal": 0.123,
         "E_accessories": 0.313,
         "purchased": 4.953
       },
-      "total_kg": 13.327,
+      "total_kg": 13.321,
       "allowance_frac": 0.12,
-      "with_allowance_kg": 14.926,
+      "with_allowance_kg": 14.92,
       "target_kg": 15.0,
       "cg_mm": [
         0.09,
         -0.06,
-        64.46
+        61.67
       ],
       "cg_radial_offset_mm": 0.11,
       "cg_offset_param_mm": 8

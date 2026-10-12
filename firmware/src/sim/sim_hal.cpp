@@ -7,6 +7,12 @@
 
 namespace sim {
 
+void SimStepper::setCurrent(float run_a, float) {
+  run_a_ = run_a;
+  const float nominal = i_ < 3 ? params::DRIVE_CURRENT_A : params::EXPANSION_CURRENT_A;
+  p_.current_scale[i_] = nominal > 0 ? run_a / nominal : 1.0;
+}
+
 hal::StepperStatus SimStepper::status() {
   hal::StepperStatus s;
   s.stalled = (i_ < 3) ? p_.arm[i_].stalled : p_.exp_stalled;
